@@ -6,3 +6,5 @@ add_executable (mgrid ${mgrid_sources})
 add_dependencies (mgrid stell)
 
 target_link_libraries (mgrid stell)
+
+add_subdirectory (Sources)
