@@ -1,0 +1,2 @@
+# MAKEGRID
+Precompute vacuum fields.
