@@ -14,4 +14,4 @@ add_subdirectory (Sources)
 
 if (OpenMP_Found)
     target_link_libraries (mgrid OpenMP::OpenMP)
-endif
+endif ()
