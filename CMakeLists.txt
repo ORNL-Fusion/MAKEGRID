@@ -2,10 +2,6 @@ cmake_minimum_required (VERSION 3.14)
 
 project (makegrid C Fortran)
 
-#  Fortran specific settings. The first setting tells the compiler to use the C
-#  preprocessor.
-set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp")
-
 add_executable (mgrid ${mgrid_sources})
 add_dependencies (mgrid stell)
 
