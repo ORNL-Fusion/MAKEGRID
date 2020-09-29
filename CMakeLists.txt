@@ -13,5 +13,5 @@ target_include_directories (mgrid PUBLIC $<TARGET_PROPERTY:stell,BINARY_DIR>)
 add_subdirectory (Sources)
 
 if (OpenMP_Found)
-    target_link_libraries (mgrid OpenMP::OpenMP)
+    target_link_libraries (mgrid OpenMP::OpenMP_Fortran)
 endif ()
