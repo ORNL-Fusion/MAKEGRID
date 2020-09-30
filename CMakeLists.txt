@@ -4,7 +4,7 @@ project (makegrid C Fortran)
 
 find_package (OpenMP)
 
-add_executable (mgrid ${mgrid_sources})
+add_executable (mgrid)
 add_dependencies (mgrid stell)
 
 target_link_libraries (mgrid stell)
