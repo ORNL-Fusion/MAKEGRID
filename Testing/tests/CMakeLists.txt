@@ -1,1 +1,1 @@
-add_directory (fields_tests)
+add_subdirectory (fields_tests)
