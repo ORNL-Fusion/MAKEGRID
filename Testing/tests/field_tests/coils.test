@@ -1,0 +1,33 @@
+!  Simple coil model. For speed, we are only going to generate the field at a
+!  single point. Then check the values for simple coil shapes.
+
+&MGRID_NLI
+    MGRID_EXT = 'test'
+    MGRID_MODE = 'R'
+    LSTELL_SYM = .TRUE.
+    RMIN = 0.0
+    RMAX = 0.5
+    ZMIN = -0.5
+    ZMAX = 0.5
+    IR = 2
+    JZ = 3
+    KP = 1
+/
+
+** coils_dot_starts_below **
+periods  1
+begin filament
+mirror NUL
+1.0  0.0   0.0  1000.0 1 CENTER-COIL
+1.0  0.0   0.0 -1000.0 2 CENTER-COIL-OPPOSIT
+1.0  0.0   0.0  1000.0 3 CENTER-COIL-CANCEL
+1.0  0.0   0.0 -1000.0 3 CENTER-COIL-CANCEL
+1.0  0.0   1.0  1000.0 4 HIGH-COIL
+1.0  0.0   1.0 -1000.0 5 HIGH-COIL-OPPOSIT
+1.0  0.0   1.0  1000.0 6 HIGH-COIL-CANCEL
+1.0  0.0   1.0 -1000.0 6 HIGH-COIL-CANCEL
+1.0  0.0  -1.0  1000.0 7 LOW-COIL
+1.0  0.0  -1.0 -1000.0 8 LOW-COIL-OPPOSIT
+1.0  0.0  -1.0  1000.0 9 LOW-COIL-CANCEL
+1.0  0.0  -1.0 -1000.0 9 LOW-COIL-CANCEL
+end
