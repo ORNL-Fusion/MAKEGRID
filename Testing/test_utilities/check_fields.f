@@ -85,6 +85,86 @@
       CALL check_real_2d_all(ncid, 'bz_009',  0.0_dp, 1.0E-20_dp,              &
      &                       test_error)
 
+!  These coils art all cirular so the poloidal magnetic field should be zero.
+!  Note we have already tested coils 3, 6 and 9 above.
+      CALL check_real_2d_all(ncid, 'bp_001',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bp_002',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bp_004',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bp_005',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bp_007',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bp_008',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+
+!  The R and Z vector potentials should be zero as well.
+      CALL check_real_2d_all(ncid, 'ar_001',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'ar_002',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'ar_004',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'ar_005',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'ar_007',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'ar_008',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_001',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_002',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_004',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_005',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_007',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_008',  0.0_dp, 1.0E-20_dp,              &
+     &                       test_error)
+
+!  Check center of the coil along the Z axis at R. The radial components should
+!  cancel along the axis.
+      CALL check_real_2d(ncid, 'br_001', 0.0_dp, 1.0E-18_dp, 1, 1,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_001', 0.0_dp, 1.0E-18_dp, 1, 2,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_001', 0.0_dp, 1.0E-18_dp, 1, 3,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_002', 0.0_dp, 1.0E-18_dp, 1, 1,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_002', 0.0_dp, 1.0E-18_dp, 1, 2,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_002', 0.0_dp, 1.0E-18_dp, 1, 3,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_004', 0.0_dp, 1.0E-18_dp, 1, 1,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_004', 0.0_dp, 1.0E-18_dp, 1, 2,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_004', 0.0_dp, 1.0E-18_dp, 1, 3,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_005', 0.0_dp, 1.0E-18_dp, 1, 1,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_005', 0.0_dp, 1.0E-18_dp, 1, 2,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_005', 0.0_dp, 1.0E-18_dp, 1, 3,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_007', 0.0_dp, 1.0E-18_dp, 1, 1,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_007', 0.0_dp, 1.0E-18_dp, 1, 2,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_007', 0.0_dp, 1.0E-18_dp, 1, 3,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_008', 0.0_dp, 1.0E-18_dp, 1, 1,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_008', 0.0_dp, 1.0E-18_dp, 1, 2,             &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'br_008', 0.0_dp, 1.0E-18_dp, 1, 3,             &
+     &                   test_error)
+
 !  Close the netcdf file.
       CALL cdf_close(ncid, local_error)
       IF (local_error .ne. 0) THEN
