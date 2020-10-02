@@ -22,7 +22,7 @@
       test_error = 0
 
 !  Open the netcdf file. File name hardcoded for now.
-      CALL cdf_open(ncid, mgrid_test.nc, 'R', local_error)
+      CALL cdf_open(ncid, 'mgrid_test.nc', 'R', local_error)
       IF (local_error .ne. 0) THEN
          WRITE (*,*) 'Open NetCDF file fialed.'
          test_error = local_error
