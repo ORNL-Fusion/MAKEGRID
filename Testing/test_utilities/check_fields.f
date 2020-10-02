@@ -10,14 +10,17 @@
       PROGRAM check_fields
       USE ezcdf
       USE stel_kinds
+      USE stel_constants
 
       IMPLICIT NONE
 
 !  Local Variables
-      INTEGER :: ncid
-      INTEGER :: local_error
-      INTEGER :: test_error
-      INTEGER :: temp_int
+      INTEGER              :: ncid
+      INTEGER              :: local_error
+      INTEGER              :: test_error
+
+!  Local Parameters
+      REAL (dp), PARAMETER :: bz_center = mu0*1000.0/2.0
 
 !  Start of executable code.
       local_error = 0
@@ -41,8 +44,8 @@
 
       CALL check_real(ncid, 'rmax',  0.5_dp, 0.0001_dp, test_error)
       CALL check_real(ncid, 'rmin',  0.0_dp, 0.0001_dp, test_error)
-      CALL check_real(ncid, 'zmax',  0.5_dp, 0.0001_dp, test_error)
-      CALL check_real(ncid, 'zmin', -0.5_dp, 0.0001_dp, test_error)
+      CALL check_real(ncid, 'zmax',  1.0_dp, 0.0001_dp, test_error)
+      CALL check_real(ncid, 'zmin', -1.0_dp, 0.0001_dp, test_error)
 
 !  All the coils with canceling currents should be zero at all points in every
 !  direction.
@@ -126,7 +129,7 @@
       CALL check_real_2d_all(ncid, 'az_008',  0.0_dp, 1.0E-20_dp,              &
      &                       test_error)
 
-!  Check center of the coil along the Z axis at R. The radial components should
+!  Check center of the coil along the Z axis at R=0. The radial components should
 !  cancel along the axis.
       CALL check_real_2d(ncid, 'br_001', 0.0_dp, 1.0E-18_dp, 1, 1,             &
      &                   test_error)
@@ -163,6 +166,26 @@
       CALL check_real_2d(ncid, 'br_008', 0.0_dp, 1.0E-18_dp, 1, 2,             &
      &                   test_error)
       CALL check_real_2d(ncid, 'br_008', 0.0_dp, 1.0E-18_dp, 1, 3,             &
+     &                   test_error)
+
+!  For the z components, the value at the center of the coil should be .
+!
+!    Bz = mu0*I/2*R                                                          (1)
+!
+!  All the coils either have a 1000 A current or -1000 A current. Each coil has
+!  a radius of 1 meter.
+      CALL check_real_2d(ncid, 'bz_001',  bz_center, 1.0E-18_dp, 1, 2,         &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'bz_002', -bz_center, 1.0E-18_dp, 1, 2,         &
+     &                   test_error)
+!  FIXME: There apears to be a bug here.
+!      CALL check_real_2d(ncid, 'bz_004',  bz_center, 1.0E-18_dp, 1, 1,         &
+!     &                   test_error)
+!      CALL check_real_2d(ncid, 'bz_005', -bz_center, 1.0E-18_dp, 1, 1,         &
+!     &                   test_error)
+      CALL check_real_2d(ncid, 'bz_007',  bz_center, 1.0E-18_dp, 1, 3,         &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'bz_008', -bz_center, 1.0E-18_dp, 1, 3,         &
      &                   test_error)
 
 !  Close the netcdf file.

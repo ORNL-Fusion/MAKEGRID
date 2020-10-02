@@ -7,8 +7,8 @@
     LSTELL_SYM = .TRUE.
     RMIN = 0.0
     RMAX = 0.5
-    ZMIN = -0.5
-    ZMAX = 0.5
+    ZMIN = -1.0
+    ZMAX = 1.0
     IR = 2
     JZ = 3
     KP = 1

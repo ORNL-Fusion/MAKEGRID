@@ -1,6 +1,7 @@
 #  Copy input file from the source to the build directory.
-file (COPY        ${CMAKE_CURRENT_SOURCE_DIR}/coils.test
-      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/coils.test
+                ${CMAKE_CURRENT_BINARY_DIR}/coils.test
+                COPYONLY)
 
 add_test (NAME    mgrid_test
           COMMAND $<TARGET_PROPERTY:mgrid,BINARY_DIR>/mgrid coils.test)
