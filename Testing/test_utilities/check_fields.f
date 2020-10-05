@@ -21,6 +21,14 @@
 
 !  Local Parameters
       REAL (dp), PARAMETER :: bz_center = mu0*1000.0/2.0
+      INTERFACE
+      FUNCTION bz_axis(z)
+      USE stel_kinds
+      IMPLICIT NONE
+      REAL (dp)             :: bz_axis
+      REAL (dp), INTENT(in) :: z
+      END FUNCTION
+      END INTERFACE
 
 !  Start of executable code.
       local_error = 0
@@ -178,15 +186,40 @@
      &                   test_error)
       CALL check_real_2d(ncid, 'bz_002', -bz_center, 1.0E-18_dp, 1, 2,         &
      &                   test_error)
-!  FIXME: There apears to be a bug here.
-!      CALL check_real_2d(ncid, 'bz_004',  bz_center, 1.0E-18_dp, 1, 1,         &
-!     &                   test_error)
-!      CALL check_real_2d(ncid, 'bz_005', -bz_center, 1.0E-18_dp, 1, 1,         &
-!     &                   test_error)
-      CALL check_real_2d(ncid, 'bz_007',  bz_center, 1.0E-18_dp, 1, 3,         &
+      CALL check_real_2d(ncid, 'bz_004',  bz_center, 1.0E-18_dp, 1, 3,         &
      &                   test_error)
-      CALL check_real_2d(ncid, 'bz_008', -bz_center, 1.0E-18_dp, 1, 3,         &
+      CALL check_real_2d(ncid, 'bz_005', -bz_center, 1.0E-18_dp, 1, 3,         &
      &                   test_error)
+      CALL check_real_2d(ncid, 'bz_007',  bz_center, 1.0E-18_dp, 1, 1,         &
+     &                   test_error)
+      CALL check_real_2d(ncid, 'bz_008', -bz_center, 1.0E-18_dp, 1, 1,         &
+     &                   test_error)
+
+!  Check the axis value on the non center positions.
+      CALL check_real_2d(ncid, 'bz_001', bz_axis(-1.0_dp), 1.0E-18_dp,         &
+     &                   1, 1, test_error)
+      CALL check_real_2d(ncid, 'bz_001', bz_axis(1.0_dp), 1.0E-18_dp,          &
+     &                   1, 3, test_error)
+      CALL check_real_2d(ncid, 'bz_002', -bz_axis(-1.0_dp), 1.0E-18_dp,        &
+     &                   1, 1, test_error)
+      CALL check_real_2d(ncid, 'bz_002', -bz_axis(1.0_dp), 1.0E-18_dp,         &
+     &                   1, 3, test_error)
+      CALL check_real_2d(ncid, 'bz_004', bz_axis(-2.0_dp), 1.0E-18_dp,         &
+     &                   1, 1, test_error)
+      CALL check_real_2d(ncid, 'bz_004', bz_axis(-1.0_dp), 1.0E-18_dp,         &
+     &                   1, 2, test_error)
+      CALL check_real_2d(ncid, 'bz_005', -bz_axis(-2.0_dp), 1.0E-18_dp,        &
+     &                   1, 1, test_error)
+      CALL check_real_2d(ncid, 'bz_005', -bz_axis(-1.0_dp), 1.0E-18_dp,        &
+     &                   1, 2, test_error)
+      CALL check_real_2d(ncid, 'bz_007', bz_axis(1.0_dp), 1.0E-18_dp,          &
+     &                   1, 2, test_error)
+      CALL check_real_2d(ncid, 'bz_007', bz_axis(2.0_dp), 1.0E-18_dp,          &
+     &                   1, 3, test_error)
+      CALL check_real_2d(ncid, 'bz_008', -bz_axis(1.0_dp), 1.0E-18_dp,         &
+     &                   1, 2, test_error)
+      CALL check_real_2d(ncid, 'bz_008', -bz_axis(2.0_dp), 1.0E-18_dp,         &
+     &                   1, 3, test_error)
 
 !  Close the netcdf file.
       CALL cdf_close(ncid, local_error)
@@ -369,3 +402,27 @@
 
       END SUBROUTINE
 
+!*******************************************************************************
+!>  @brief Compute the field at a Z away from the center.
+!>
+!>  The magnetic field at a point R=0, Z is given by
+!>
+!>    B_z = mu0/2 R^2*I/(z^2 + R^2)^3/2
+!>
+!>  @param[in] z NetCDF file reference.
+!>  @erturns The B_z at point z.
+!*******************************************************************************
+      FUNCTION bz_axis(z)
+      USE stel_kinds
+      USE stel_constants
+
+      IMPLICIT NONE
+
+!  Declare Arguments
+      REAL (dp)             :: bz_axis
+      REAL (dp), INTENT(in) :: z
+
+!  Start of executable code.
+      bz_axis = mu0*1000.0_dp/(2.0_dp*SQRT(z*z + 1.0_dp)**3)
+
+      END FUNCTION

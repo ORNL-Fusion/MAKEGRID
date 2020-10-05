@@ -4,7 +4,7 @@
 &MGRID_NLI
     MGRID_EXT = 'test'
     MGRID_MODE = 'R'
-    LSTELL_SYM = .TRUE.
+    LSTELL_SYM = .FALSE.
     RMIN = 0.0
     RMAX = 0.5
     ZMIN = -1.0
