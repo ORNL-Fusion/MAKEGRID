@@ -44,97 +44,111 @@
 !  For now the tests are hard coded. Tests coils will produce fields on a 2x3
 !  grid ranging from r = [0,0.5] z =[-0.5,0.5]. First check the dimensions to
 !  make sure mgrid file was created as expected.
-      CALL check_int(ncid, 'ir',      2, test_error)
-      CALL check_int(ncid, 'jz',      3, test_error)
-      CALL check_int(ncid, 'kp',      1, test_error)
-      CALL check_int(ncid, 'nfp',     1, test_error)
-      CALL check_int(ncid, 'nextcur', 9, test_error)
+      CALL check_int(ncid, 'ir',      2,  test_error)
+      CALL check_int(ncid, 'jz',      3,  test_error)
+      CALL check_int(ncid, 'kp',      1,  test_error)
+      CALL check_int(ncid, 'nfp',     1,  test_error)
+      CALL check_int(ncid, 'nextcur', 10, test_error)
 
-      CALL check_real(ncid, 'rmax',  0.5_dp, 0.0001_dp, test_error)
-      CALL check_real(ncid, 'rmin',  0.0_dp, 0.0001_dp, test_error)
-      CALL check_real(ncid, 'zmax',  1.0_dp, 0.0001_dp, test_error)
-      CALL check_real(ncid, 'zmin', -1.0_dp, 0.0001_dp, test_error)
+      CALL check_real(ncid, 'rmax',  0.5_dp, 1.0E-20_dp, test_error)
+      CALL check_real(ncid, 'rmin',  0.0_dp, 1.0E-20_dp, test_error)
+      CALL check_real(ncid, 'zmax',  1.0_dp, 1.0E-20_dp, test_error)
+      CALL check_real(ncid, 'zmin', -1.0_dp, 1.0E-20_dp, test_error)
 
 !  All the coils with canceling currents should be zero at all points in every
 !  direction.
-      CALL check_real_2d_all(ncid, 'ar_003',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_003', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'ap_003',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ap_003', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_003',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_003', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'br_003',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'br_003', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_003',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_003', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bz_003',  0.0_dp, 1.0E-20_dp,              &
-     &                       test_error)
-
-      CALL check_real_2d_all(ncid, 'ar_006',  0.0_dp, 1.0E-20_dp,              &
-     &                       test_error)
-      CALL check_real_2d_all(ncid, 'ap_006',  0.0_dp, 1.0E-20_dp,              &
-     &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_006',  0.0_dp, 1.0E-20_dp,              &
-     &                       test_error)
-      CALL check_real_2d_all(ncid, 'br_006',  0.0_dp, 1.0E-20_dp,              &
-     &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_006',  0.0_dp, 1.0E-20_dp,              &
-     &                       test_error)
-      CALL check_real_2d_all(ncid, 'bz_006',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bz_003', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
 
-      CALL check_real_2d_all(ncid, 'ar_009',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_006', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'ap_009',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ap_006', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_009',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_006', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'br_009',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'br_006', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_009',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_006', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bz_009',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bz_006', 0.0_dp, 1.0E-20_dp,               &
+     &                       test_error)
+
+      CALL check_real_2d_all(ncid, 'ar_009', 0.0_dp, 1.0E-20_dp,               &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'ap_009', 0.0_dp, 1.0E-20_dp,               &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_009', 0.0_dp, 1.0E-20_dp,               &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'br_009', 0.0_dp, 1.0E-20_dp,               &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bp_009', 0.0_dp, 1.0E-20_dp,               &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bz_009', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
 
 !  These coils art all cirular so the poloidal magnetic field should be zero.
 !  Note we have already tested coils 3, 6 and 9 above.
-      CALL check_real_2d_all(ncid, 'bp_001',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_001', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_002',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_002', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_004',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_004', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_005',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_005', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_007',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_007', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'bp_008',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'bp_008', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
 
 !  The R and Z vector potentials should be zero as well.
-      CALL check_real_2d_all(ncid, 'ar_001',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_001', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'ar_002',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_002', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'ar_004',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_004', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'ar_005',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_005', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'ar_007',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_007', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'ar_008',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'ar_008', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_001',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_001', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_002',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_002', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_004',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_004', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_005',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_005', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_007',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_007', 0.0_dp, 1.0E-20_dp,               &
      &                       test_error)
-      CALL check_real_2d_all(ncid, 'az_008',  0.0_dp, 1.0E-20_dp,              &
+      CALL check_real_2d_all(ncid, 'az_008', 0.0_dp, 1.0E-20_dp,               &
+     &                       test_error)
+!  Coil ten is a cirular coil with segmented circular coil with current in the
+!  opposite direction. This should produce zero field.
+      CALL check_real_2d_all(ncid, 'ar_010', 0.0_dp, 5.0E-5_dp,                &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'ap_010', 0.0_dp, 1.0E-6_dp,                &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'az_010', 0.0_dp, 1.0E-6_dp,                &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'br_010', 0.0_dp, 1.0E-6_dp,                &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bp_010', 0.0_dp, 1.0E-6_dp,                &
+     &                       test_error)
+      CALL check_real_2d_all(ncid, 'bz_010', 0.0_dp, 2.0E-5_dp,                &
      &                       test_error)
 
 !  Check center of the coil along the Z axis at R=0. The radial components should
