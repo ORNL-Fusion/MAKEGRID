@@ -138,7 +138,7 @@
 !---------------------------------------------------------------------------
 
       USE write_mgrid, only: mgrid_ext, mgrid_mode, lstell_sym,                & 
-     &   rmin, rmax, zmin, zmax, kp, ir, jz
+     &                       rmin, rmax, zmin, zmax, kp, ir, jz
 
       USE makegrid_global, only: task
 
@@ -183,55 +183,56 @@
 
       SELECT CASE(numargs)
 
-      CASE(1)
-!        INTERACTIVE (USE REDIRECTED DRIVER FILE ALSO, XGRID < DRIVER)
-         IF (arg1 .EQ. '-h' .OR. arg1 .EQ. '--h' .OR. arg1 .EQ. '-H' 
-     1      .OR. arg1 .EQ. '--H') THEN
-            DO i=1, SIZE(help_message)
-               WRITE(6,*) help_message(i)
-            END DO
-            STOP
-         ELSE
-            CALL namelist_input(arg1)
-         END IF
+         CASE (1)
+!  INTERACTIVE (USE REDIRECTED DRIVER FILE ALSO, XGRID < DRIVER)
+            IF (arg1 .EQ. '-h' .OR. arg1 .EQ. '--h' .OR. arg1 .EQ. '-H'
+     &          .OR. arg1 .EQ. '--H') THEN
+               DO i = 1, SIZE(help_message)
+                  WRITE(6,*) help_message(i)
+               END DO
+               STOP
+            ELSE
+               CALL namelist_input(arg1)
+            END IF
 
-      CASE(0)
+         CASE(0)
 !  Only used for task 'MGRID'
-         CALL interactive_input() !sets task='MGRID'
+            CALL interactive_input() !sets task='MGRID'
 
-      CASE(8:10)
+         CASE(8:10)
 !  Only used for task 'MGRID'
-         arg1 = ADJUSTL(arg1)
-         mgrid_ext = TRIM(arg1)
-         CALL getcarg(2, arg1, numargs)
-         IF (arg1(1:1) == 'R' .or. arg1(1:1) == 'r')
-     1      mgrid_mode = 'R'
-         CALL getcarg(3, arg1, numargs)
-         IF (arg1(1:1) == 'Y' .or. arg1(1:1) == 'y' .or.
-     1       arg1(1:1) == 'T' .or. arg1(1:1) == 't')
-     1       lstell_sym = .true.
-         CALL getcarg(4, arg1, numargs)
-         READ (arg1, *) rmin
-         CALL getcarg(5, arg1, numargs)
-         READ (arg1, *) rmax
-         CALL getcarg(6, arg1, numargs)
-         READ (arg1, *) zmin
-         CALL getcarg(7, arg1, numargs)
-         READ (arg1, *) zmax
-         CALL getcarg(8, arg1, numargs)
-         READ (arg1, *) kp
-         IF (numargs .GE. 9) THEN
-            CALL getcarg(9, arg1, numargs)
-            READ (arg1, *) ir
-         END IF
-         IF (numargs .EQ. 10) THEN
-            CALL getcarg(10, arg1, numargs)
-            READ (arg1, *) jz
-         END IF
-         task='MGRID'
+            arg1 = ADJUSTL(arg1)
+            mgrid_ext = TRIM(arg1)
+            CALL getcarg(2, arg1, numargs)
+            IF (arg1(1:1) == 'R' .or. arg1(1:1) == 'r') THEN
+               mgrid_mode = 'R'
+            END IF
+            CALL getcarg(3, arg1, numargs)
+            lstell_sym = arg1(1:1) == 'Y' .or. arg1(1:1) == 'y' .or.
+     &                   arg1(1:1) == 'T' .or. arg1(1:1) == 't'
+            CALL getcarg(4, arg1, numargs)
+            READ (arg1, *) rmin
+            CALL getcarg(5, arg1, numargs)
+            READ (arg1, *) rmax
+            CALL getcarg(6, arg1, numargs)
+            READ (arg1, *) zmin
+            CALL getcarg(7, arg1, numargs)
+            READ (arg1, *) zmax
+            CALL getcarg(8, arg1, numargs)
+            READ (arg1, *) kp
+            IF (numargs .GE. 9) THEN
+               CALL getcarg(9, arg1, numargs)
+               READ (arg1, *) ir
+            END IF
+            IF (numargs .EQ. 10) THEN
+               CALL getcarg(10, arg1, numargs)
+               READ (arg1, *) jz
+            END IF
+            task='MGRID'
 
-      CASE DEFAULT
-         STOP 'Unknown number of arguments, type "xgrid -h" for help.'
+         CASE DEFAULT
+            STOP 'Unknown number of arguments, type "xgrid -h" ' //            &
+     &           'for help.'
       
       END SELECT
 
@@ -250,26 +251,21 @@
       
       SELECT CASE(TRIM(ADJUSTL(task_use)))
       
-      CASE('mgrid')
+         CASE('mgrid')
+            CALL task_mgrid()
 
-         CALL task_mgrid()
+         CASE('mgrid_rs')
+            CALL task_mgrid_rs()
 
-      CASE('mgrid_rs')
-      
-         CALL task_mgrid_rs()
-
-      CASE('circ_tor_mgrid')
-      
-         CALL task_circ_tor_grid()
+         CASE('circ_tor_mgrid')
+            CALL task_circ_tor_grid()
           
-      CASE DEFAULT
-      
-         WRITE(*,*) 'Unknown task ', TRIM(ADJUSTL(task_use))
+         CASE DEFAULT
+            WRITE(*,*) 'Unknown task ', TRIM(ADJUSTL(task_use))
       
       END SELECT
 
       END PROGRAM makegrid
-
 
 !*******************************************************************************
 ! SECTION II.	Initialization Subroutines
@@ -286,12 +282,13 @@
       USE stel_constants
       
       USE write_mgrid, only: mgrid_ext, mgrid_mode, lstell_sym,                & 
-     &   rmin, rmax, zmin, zmax, kp, ir, jz, use_eddy
+     &                       rmin, rmax, zmin, zmax, kp, ir, jz,               &
+     &                       use_eddy
 
       USE makegrid_global, only: task, rmajor, aminor, nphi, ntheta,           &
-     &   extcur_mgrid,                                                         &
-     &   cg_shift_1, cg_shift_2, cg_rot_xcent, cg_rot_theta,                   &
-     &   cg_rot_phi, cg_rot_angle, l_rot_coil_center
+     &                           extcur_mgrid, cg_shift_1, cg_shift_2,         &
+     &                           cg_rot_xcent, cg_rot_theta, cg_rot_phi,       &
+     &                           cg_rot_angle, l_rot_coil_center
      
       USE sym_check, ONLY: sym_ir, sym_jz, sym_kp, sym_perform_tests
 
@@ -301,8 +298,8 @@
 !-----------------------------------------------
       
       CHARACTER(LEN=100), INTENT(IN) :: arg1
-      INTEGER :: ferror
-      INTEGER, PARAMETER :: iou_nli=12
+      INTEGER                        :: ferror
+      INTEGER, PARAMETER             :: iou_nli=12
 
 !-----------------------------------------------
 !   **  Namelist Variables  **
@@ -365,28 +362,28 @@
 !-----------------------------------------------
 !  Initialize namelist
 
-      task='MGRID'
-      mgrid_ext='dummy.cth.m.d12c.f5ss'
-      mgrid_mode='R'
-      lstell_sym=.TRUE.
-      rmin=.45
-      rmax=1.05
-      zmin=-.3
-      zmax=.3
-      kp=5
+      task = 'MGRID'
+      mgrid_ext = 'dummy.cth.m.d12c.f5ss'
+      mgrid_mode = 'R'
+      lstell_sym = .TRUE.
+      rmin = 0.45
+      rmax = 1.05
+      zmin = -0.3
+      zmax = 0.3
+      kp = 5
 !  Commented out below, so that ir and jz have default values as specified in
 !    module write_mgrid
 !      ir=20          
 !      jz=20
-      rmajor=1
-      aminor=0.5
-      nphi=3
-      ntheta=3
-      extcur_mgrid=1.
-      sym_ir=5
-      sym_jz=5
-      sym_kp=4
-      sym_perform_tests=.FALSE.
+      rmajor = 1
+      aminor = 0.5
+      nphi = 3
+      ntheta = 3
+      extcur_mgrid = 1.
+      sym_ir = 5
+      sym_jz = 5
+      sym_kp = 4
+      sym_perform_tests = .FALSE.
       
       cg_shift_1 = zero
       cg_shift_2 = zero
@@ -398,15 +395,14 @@
 
       use_eddy = .false.
 
-      WRITE(*,*) ' Running makegrid using NLI file ',
-     1           arg1
+      WRITE(*,*) ' Running makegrid using NLI file ', arg1
       OPEN(iou_nli, FILE=TRIM(ADJUSTL(arg1)),STATUS='OLD',IOSTAT=ferror)
       IF(ferror .NE. 0) THEN
          WRITE(*,*) 'Could not open NLI file ', arg1
          WRITE(*,*) 'Open failed with error status ', ferror
       END IF
             
-      READ(iou_nli,mgrid_nli)
+      READ(iou_nli, mgrid_nli)
       
       CLOSE(iou_nli)
 
@@ -422,8 +418,8 @@
 !    backwards compatibility with the earlier version of makegrid.
 
       USE write_mgrid, only: mgrid_ext, mgrid_mode, lstell_sym,                & 
-     &   rmin, rmax, zmin, zmax, kp, ir, jz,                                   & 
-     &   mgrid_file
+     &                       rmin, rmax, zmin, zmax, kp, ir, jz,               &
+     &                       mgrid_file
 
       USE makegrid_global, only: task
 
@@ -431,58 +427,59 @@
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
-      INTEGER :: numargs, i
-      CHARACTER(LEN=100) :: arg1
+      INTEGER             :: numargs
+      INTEGER             :: i
+      CHARACTER (LEN=100) :: arg1
       
 !-----------------------------------------------
 !  Start of Executable Code
 !-----------------------------------------------
       
-      WRITE (6, 220, advance='no')                                             & 
-     &  ' Enter extension of "coils" file     : '
+      WRITE (6, 220, advance='no')                                             &
+     &   ' Enter extension of "coils" file     : '
       READ (*, *) mgrid_ext
 
-      WRITE (6, '(a,/,a)', advance='no')                                       &  
-     &  ' Scale (S) bfield to unit current/turn OR',                           & 
-     &  ' use raw (R) currents from coils file: '
+      WRITE (6, '(a,/,a)', advance='no')                                       &
+     &   ' Scale (S) bfield to unit current/turn OR',                          &
+     &   ' use raw (R) currents from coils file: '
       READ (*, *) mgrid_file
-      IF (mgrid_file(1:1) == 'R' .or. mgrid_file(1:1) == 'r')
-     &   mgrid_mode = 'R'
+      IF (mgrid_file(1:1) == 'R' .or. mgrid_file(1:1) == 'r') THEN
+         mgrid_mode = 'R'
+      END IF
 
       WRITE (6, 220, advance='no')                                             & 
-     &  ' Assume stellarator symmetry (Y/N)?  : '
+     &   ' Assume stellarator symmetry (Y/N)?  : '
       READ (*, *) mgrid_file
-      IF (mgrid_file(1:1) == 'Y' .or. mgrid_file(1:1) == 'y')
-     &   lstell_sym = .true.
+      lstell_sym = mgrid_file(1:1) == 'Y' .or. mgrid_file(1:1) == 'y'
 
       WRITE (6, 220, advance='no')                                             & 
-     &  ' Enter rmin (min radial grid dimension)  : '
+     &   ' Enter rmin (min radial grid dimension)  : '
       READ (*, *) rmin
 
       WRITE (6, 220, advance='no')                                             &  
-     &  ' Enter rmax (max radial grid dimension)  : '
+     &   ' Enter rmax (max radial grid dimension)  : '
       READ (*, *) rmax
 
       WRITE (6, 220, advance='no')                                             & 
-     &  ' Enter zmin (min vertical grid dimension): '
+     &   ' Enter zmin (min vertical grid dimension): '
       READ (*, *) zmin
 
       WRITE (6, 220, advance='no')                                             &  
-     &  ' Enter zmax (max vertical grid dimension): '
+     &   ' Enter zmax (max vertical grid dimension): '
       READ (*, *) zmax
 
       WRITE (6, 220, advance='no')                                             & 
-     &  ' Enter number of toroidal planes/period  : '
+     &   ' Enter number of toroidal planes/period  : '
       READ (*, *) kp
 
       WRITE (6, 220, advance='no')                                             & 
-     &  ' Enter number of r (radial) mesh points  : '
+     &   ' Enter number of r (radial) mesh points  : '
       READ (*, *) ir
 
       WRITE (6, 220, advance='no')                                             & 
-     &  ' Enter number of z mesh points  : '
+     &   ' Enter number of z mesh points  : '
       READ (*, *) jz
-      task='MGRID'
+      task = 'MGRID'
       
  220  FORMAT(a)
       
@@ -530,13 +527,18 @@
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
-      INTEGER :: istat
-      CHARACTER(LEN=100) :: extcur_file
-      REAL(rprec) :: time_start, time_end1, time_end2
+      INTEGER                                 :: istat
+      CHARACTER (LEN=100)                     :: extcur_file
+      REAL (rprec)                            :: time_start
+      REAL (rprec)                            :: time_end1
+      REAL (rprec)                            :: time_end2
 
-      REAL(rprec) :: r_ave, z_ave
-      REAL(rprec), DIMENSION(:), ALLOCATABLE :: phi_array
-      INTEGER :: kmax, k, icoll
+      REAL (rprec)                            :: r_ave
+      REAL (rprec)                            :: z_ave
+      REAL (rprec), DIMENSION(:), ALLOCATABLE :: phi_array
+      INTEGER                                 :: kmax
+      INTEGER                                 :: k
+      INTEGER                                 :: icoll
       
 !-----------------------------------------------
 !  Start of Executable Code
@@ -564,12 +566,17 @@
       IF (kp .le. 0) STOP 'kp must be > 0 in xgrid'
 
       ALLOCATE (br(ir,jz,kp), bz(ir,jz,kp), bp(ir,jz,kp), stat=istat)
-      IF (istat .ne. 0) STOP ' allocation error in xgrid'
+      IF (istat .ne. 0) THEN
+         STOP ' allocation error in xgrid'
+      END IF
       ALLOCATE (ar(ir,jz,kp), az(ir,jz,kp), ap(ir,jz,kp), stat=istat)
-      IF (istat .ne. 0) STOP ' allocation error in xgrid'
+      IF (istat .ne. 0) THEN
+         STOP ' allocation error in xgrid'
+      END IF
 
       IF (lstell_sym) THEN
-         kp2 = kp/2;  jz2 = jz/2
+         kp2 = kp/2
+         jz2 = jz/2
          kp_odd = MOD(kp,2)
          jz_odd = MOD(jz,2)
 !
@@ -583,8 +590,10 @@
             zmax = -zmin
          END IF
       ELSE
-         kp2 = kp;    jz2 = jz
-         kp_odd = 0;  jz_odd = 0
+         kp2 = kp
+         jz2 = jz
+         kp_odd = 0
+         jz_odd = 0
       END IF
 
       coil_file = 'coils.' // TRIM(mgrid_ext)
@@ -606,7 +615,7 @@
 
       iextc = 100
       CALL safe_open(iextc, istat, TRIM(extcur_file),
-     1   'replace', 'formatted')
+     &   'replace', 'formatted')
       IF (istat .ne. 0) THEN
          WRITE (6,*) 'XGRID could not create ', TRIM(extcur_file)
          WRITE (6,*) 'IOSTAT = ', istat,' IUNIT = ', iextc
@@ -624,7 +633,7 @@
 
 !  parse_coils_file is in module biotsavart, made available through the
 !  USE write_mgrid
-      CALL parse_coils_file (coil_file)
+      CALL parse_coils_file(coil_file)
       nfp = nfp_bs
       nextcur = SIZE(coil_group)
       IF (use_eddy) THEN
@@ -648,29 +657,29 @@
 
       CALL second0(time_end2)
 
-      WRITE (*, '(2(/,a,f8.3,a))') 
-     1     ' TIME IN PARSER = ', time_end1-time_start,' SECONDS',
-     2     ' TIME IN BFIELD = ', time_end2-time_end1,' SECONDS'
+      WRITE (*, '(2(/,a,f8.3,a))')                                             &
+     &   ' TIME IN PARSER = ', time_end1 - time_start,' SECONDS',              &
+     &   ' TIME IN BFIELD = ', time_end2 - time_end1,' SECONDS'
       
 !-----------------------------------------------
 !  Print out information about each coil group
 !    NB coil_group is an allocatable array of bsc_coilcoll declared in module
 !    biotsavart
       WRITE(*,'(/a/)') "Extra Information about coil groups:"
-      kmax = MAX(1,kp2 + kp_odd)                    ! logic from write_mgrid
-      IF ((kp_odd == 0) .and. lstell_sym) THEN
+      kmax = MAX(1, kp2 + kp_odd)                    ! logic from write_mgrid
+      IF ((kp_odd .eq. 0) .and. lstell_sym) THEN
          kmax = MAX(kmax,kp2 + 1)
-      ENDIF
+      END IF
       ALLOCATE (phi_array(kmax))
       r_ave = (rmax + rmin) / 2.
       z_ave = (zmax + zmin) / 2.
       DO k = 1, kmax
-         phi_array(k) = (k-1) * delp
+         phi_array(k) = (k - 1) * delp
       END DO
       CALL init_symmetry
       DO icoll = 1, SIZE(coil_group)
-         CALL coil_group_report(coil_group(icoll),icoll,r_ave,z_ave            &
-     &      ,kmax,phi_array(1:kmax))
+         CALL coil_group_report(coil_group(icoll), icoll, r_ave, z_ave,        &
+     &                          kmax, phi_array(1:kmax))
       END DO
       DEALLOCATE (phi_array)
       WRITE(*,'(/80("*"))')
@@ -695,17 +704,17 @@
       DEALLOCATE (extcur)
       
  200  FORMAT(/,
-     1  ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN SCALED',
-     2  ' MODE. THE EXTERNAL',/,' CURRENTS CORRESPONDING TO THOSE',
-     3  ' IN THE COILS-DOT FILE',/,' ARE GIVEN IN THE EXTCUR ARRAY IN',
-     4  ' THE FILE',1x,a,'. THEY SHOULD BE ENTERED INTO THE VMEC',
-     5  ' INPUT (INDATA) FILE.'/)
+     &       ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN SCALED',
+     &       ' MODE. THE EXTERNAL',/,' CURRENTS CORRESPONDING TO THOSE',
+     &       ' IN THE COILS-DOT FILE',/,' ARE GIVEN IN THE EXTCUR ARRAY',
+     &       ' IN THE FILE',1x,a,'. THEY SHOULD BE ENTERED INTO THE',
+     &       ' VMEC INPUT (INDATA) FILE.'/)
  205  FORMAT(/,
-     1  ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN RAW MODE.',
-     2 /' THE USER MUST PROVIDE THE EXTCUR ARRAY VALUES FOR THE',
-     3  ' VMEC INPUT (INDATA) FILE.',
-     4 /' CHOOSING EXTCUR=1 CORRESPONDS TO THE CURRENTS PRESENT',
-     5  ' IN THE COILS FILE.')
+     &       ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN RAW',
+     &       /' MODE. THE USER MUST PROVIDE THE EXTCUR ARRAY VALUES FOR',
+     &       ' THE VMEC INPUT (INDATA) FILE.',
+     &       /' CHOOSING EXTCUR=1 CORRESPONDS TO THE CURRENTS PRESENT',
+     &       ' IN THE COILS FILE.')
 
       
       END SUBROUTINE task_mgrid
@@ -734,9 +743,10 @@
       USE biotsavart !  variables nfp_bs, coil_group
                      !  subroutines parse_coils_file
 
-      USE makegrid_global, only: task, nextcur_dim,                            &
-     &   cg_shift_1, cg_shift_2, cg_rot_xcent, cg_rot_theta,                   &
-     &   cg_rot_phi, cg_rot_angle, l_rot_coil_center
+      USE makegrid_global, only: task, nextcur_dim, cg_shift_1,                &
+     &                           cg_shift_2, cg_rot_xcent,                     &
+     &                           cg_rot_theta, cg_rot_phi,                     &
+     &                           cg_rot_angle, l_rot_coil_center
 
       USE safe_open_mod !safe_open()
       
@@ -746,51 +756,75 @@
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
-      INTEGER :: istat
-      CHARACTER(LEN=100) :: extcur_file
-      REAL(rprec) :: time_start, time_end1, time_end2
+      INTEGER                                 :: istat
+      CHARACTER (LEN=100)                     :: extcur_file
+      REAL (rprec)                            :: time_start
+      REAL (rprec)                            :: time_end1
+      REAL (rprec)                            :: time_end2
  
-      INTEGER :: iextcur, icoil
-      REAL(rprec), DIMENSION(3) :: cgxcent, cg_rot_xcent_use, mean_r
-      REAL(rprec), DIMENSION(3) :: zero_a3 = (/zero,zero,zero/)
-      REAL(rprec) :: cur_coil, cur_total
+      INTEGER                                 :: iextcur
+      INTEGER                                 :: icoil
+      REAL (rprec), DIMENSION(3)              :: cgxcent
+      REAL (rprec), DIMENSION(3)              :: cg_rot_xcent_use
+      REAL (rprec), DIMENSION(3)              :: mean_r
+      REAL (rprec)                            :: cur_coil
+      REAL (rprec)                            :: cur_total
 
-      REAL(rprec) :: r_ave, z_ave
-      REAL(rprec), DIMENSION(:), ALLOCATABLE :: phi_array
-      INTEGER :: kmax, k, icoll
+      REAL (rprec)                            :: r_ave
+      REAL (rprec)                            :: z_ave
+      REAL (rprec), DIMENSION(:), ALLOCATABLE :: phi_array
+      INTEGER                                 :: kmax
+      INTEGER                                 :: k
+      INTEGER                                 :: icoll
       
-      TYPE (bsc_rs) :: this_bsc_rs      !  Derived type from bsc, for rotation and shift
-      
+      TYPE (bsc_rs)                           :: this_bsc_rs      !  Derived type from bsc, for rotation and shift
+
+      REAL (rprec), DIMENSION(3), PARAMETER ::                                 &
+     &   zero_a3 = (/zero,zero,zero/)
+
 !-----------------------------------------------
 !  Start of Executable Code
 !-----------------------------------------------      
       
-      WRITE(*,*) ' Running makegrid with the following parameters:'
-      WRITE(*,*) '   task       = ', task
-      WRITE(*,*) '   mgrid_ext  = ', mgrid_ext
-      WRITE(*,*) '   mgrid_mode = ', mgrid_mode
-      WRITE(*,*) '   lstell_sym = ', lstell_sym
-      WRITE(*,*) '   rmin       = ', rmin
-      WRITE(*,*) '   rmax       = ', rmax
-      WRITE(*,*) '   zmin       = ', zmin
-      WRITE(*,*) '   zmax       = ', zmax
-      WRITE(*,*) '   kp         = ', kp
-      WRITE(*,*) '   ir         = ', ir
-      WRITE(*,*) '   jz         = ', jz
-      WRITE(*,*)
+      WRITE (*,*) ' Running makegrid with the following parameters:'
+      WRITE (*,*) '   task       = ', task
+      WRITE (*,*) '   mgrid_ext  = ', mgrid_ext
+      WRITE (*,*) '   mgrid_mode = ', mgrid_mode
+      WRITE (*,*) '   lstell_sym = ', lstell_sym
+      WRITE (*,*) '   rmin       = ', rmin
+      WRITE (*,*) '   rmax       = ', rmax
+      WRITE (*,*) '   zmin       = ', zmin
+      WRITE (*,*) '   zmax       = ', zmax
+      WRITE (*,*) '   kp         = ', kp
+      WRITE (*,*) '   ir         = ', ir
+      WRITE (*,*) '   jz         = ', jz
+      WRITE (*,*)
 
-      IF (rmin .lt. 0.) STOP ' rmin must be > 0 in xgrid'
-      IF (rmax .le. rmin) STOP ' rmax must be > rmin in xgrid'
-      IF (zmax .le. zmin) STOP ' zmax must be > zmin in xgrid'
-      IF (kp .le. 0) STOP 'kp must be > 0 in xgrid'
+      IF (rmin .lt. 0.) THEN
+         STOP ' rmin must be > 0 in xgrid'
+      END IF
+      IF (rmax .le. rmin) THEN
+         STOP ' rmax must be > rmin in xgrid'
+      END IF
+      IF (zmax .le. zmin) THEN
+         STOP ' zmax must be > zmin in xgrid'
+      END IF
+      IF (kp .le. 0) THEN
+         STOP 'kp must be > 0 in xgrid'
+      END IF
 
       ALLOCATE (br(ir,jz,kp), bz(ir,jz,kp), bp(ir,jz,kp), stat=istat)
-      IF (istat .ne. 0) STOP ' allocation error in xgrid'
+      IF (istat .ne. 0) THEN
+         STOP ' allocation error in xgrid'
+      END IF
       ALLOCATE (ar(ir,jz,kp), az(ir,jz,kp), ap(ir,jz,kp), stat=istat)
-      IF (istat .ne. 0) STOP ' allocation error in xgrid'
+      IF (istat .ne. 0) THEN
+         STOP ' allocation error in xgrid'
+      END IF
 
       IF (lstell_sym) THEN
-         kp2 = kp/2;  jz2 = jz/2
+         kp2 = kp/2
+         jz2 = jz/2
          kp_odd = MOD(kp,2)
          jz_odd = MOD(jz,2)
 !
@@ -804,8 +838,10 @@
             zmax = -zmin
          END IF
       ELSE
-         kp2 = kp;    jz2 = jz
-         kp_odd = 0;  jz_odd = 0
+         kp2 = kp
+         jz2 = jz
+         kp_odd = 0
+         jz_odd = 0
       END IF
 
       coil_file = 'coils.' // TRIM(mgrid_ext)
@@ -826,7 +862,7 @@
 
       iextc = 100
       CALL safe_open(iextc, istat, TRIM(extcur_file),
-     1   'replace', 'formatted')
+     &               'replace', 'formatted')
       IF (istat .ne. 0) THEN
          WRITE (6,*) 'XGRID could not create ', TRIM(extcur_file)
          WRITE (6,*) 'IOSTAT = ', istat,' IUNIT = ', iextc
@@ -842,7 +878,7 @@
 
 !  parse_coils_file is in module biotsavart, made available through the
 !  USE write_mgrid
-      CALL parse_coils_file (coil_file)
+      CALL parse_coils_file(coil_file)
       nfp = nfp_bs
       nextcur = SIZE(coil_group)
       IF (use_eddy) THEN
@@ -850,7 +886,7 @@
       END IF
 
 ! Test to make sure that nextcur <= nextcur_dim
-      IF(nextcur .gt. nextcur_dim) THEN
+      IF (nextcur .gt. nextcur_dim) THEN
          WRITE(*,*) 'Number of coils greater than default number of ',         &
      &              'currents.'
          STOP
@@ -866,13 +902,13 @@
 !  Loop over coil groups
       WRITE(*,*)
       WRITE(*,*) ' Rotate and Shift of the Coil Groups'
-      DO iextcur = 1,nextcur
+      DO iextcur = 1, nextcur
          WRITE(*,*)
          IF (iextcur .eq. nextcur .and. use_eddy) THEN
             EXIT
          ELSE
             WRITE(*,*) ' Coil Group ', iextcur,' with s_name ',
-     &         coil_group(iextcur) % s_name
+     &                 coil_group(iextcur)%s_name
          END IF
 
 !  Debug/test - spill the first coil in the coil group. Comment out if unneeded.
@@ -883,14 +919,16 @@
 !    Compute current-averaged center of coil group (cgxcent)
          cgxcent(1:3) = zero
          cur_total = zero
-         DO icoil = 1, coil_group(iextcur) % ncoil
-            cur_coil = coil_group(iextcur) % coils(icoil) % current
+         DO icoil = 1, coil_group(iextcur)%ncoil
+            cur_coil = coil_group(iextcur)%coils(icoil)%current
             cur_total = cur_total + cur_coil
-            CALL bsc_mean_r(coil_group(iextcur) % coils(icoil),                &
-     &         mean_r)
-            cgxcent(1:3) = cgxcent(1:3) + mean_r(1:3) * cur_coil
+            CALL bsc_mean_r(coil_group(iextcur)%coils(icoil),                  &
+     &                      mean_r)
+            cgxcent(1:3) = cgxcent(1:3) + mean_r(1:3)*cur_coil
          END DO
-         IF (cur_total .ne. 0) cgxcent(1:3) = cgxcent(1:3) / cur_total
+         IF (cur_total .ne. 0) THEN
+            cgxcent(1:3) = cgxcent(1:3)/cur_total
+         END IF
          IF (l_rot_coil_center(iextcur)) THEN
             cg_rot_xcent_use = cgxcent
          ELSE
@@ -898,15 +936,17 @@
          ENDIF
  
 !    Generate bsc_rs for first shift, and apply it
-         CALL bsc_construct_rs(this_bsc_rs,zero,zero,zero,zero_a3,             &
-     &      cg_shift_1(iextcur,1:3))
-         CALL bsc_rot_shift(coil_group(iextcur),this_bsc_rs)
+         CALL bsc_construct_rs(this_bsc_rs, zero, zero, zero, zero_a3,         &
+     &                         cg_shift_1(iextcur,1:3))
+         CALL bsc_rot_shift(coil_group(iextcur), this_bsc_rs)
 
 !    Generate bsc_rs for rotation and second shift, and apply it
-         CALL bsc_construct_rs(this_bsc_rs,cg_rot_theta(iextcur),              &
-     &      cg_rot_phi(iextcur),cg_rot_angle(iextcur),                         &
-     &      cg_rot_xcent_use(1:3),cg_shift_2(iextcur,1:3))
-         CALL bsc_rot_shift(coil_group(iextcur),this_bsc_rs)
+         CALL bsc_construct_rs(this_bsc_rs, cg_rot_theta(iextcur),             &
+     &                         cg_rot_phi(iextcur),                            &
+     &                         cg_rot_angle(iextcur),                          &
+     &                         cg_rot_xcent_use(1:3),                          &
+     &                         cg_shift_2(iextcur,1:3))
+         CALL bsc_rot_shift(coil_group(iextcur), this_bsc_rs)
 
 
          WRITE(*,1000) '   Current-Averaged center of cg = ',                  &
@@ -943,31 +983,31 @@
       CALL second0(time_end2)
 
       WRITE (*, '(2(/,a,f8.3,a))') 
-     1     ' TIME IN PARSER = ', time_end1-time_start,' SECONDS',
-     2     ' TIME IN BFIELD = ', time_end2-time_end1,' SECONDS'
+     &     ' TIME IN PARSER = ', time_end1-time_start,' SECONDS',
+     &     ' TIME IN BFIELD = ', time_end2-time_end1,' SECONDS'
  
 !-----------------------------------------------
 !  Print out information about each coil group
 !    NB coil_group is an allocatable array of bsc_coilcoll declared in module
 !    biotsavart
-      WRITE(*,'(/a/)') "Extra Information about coil groups:"
+      WRITE (*,'(/a/)') "Extra Information about coil groups:"
       kmax = MAX(1,kp2 + kp_odd)                    ! logic from write_mgrid
-      IF ((kp_odd == 0) .and. lstell_sym) THEN
+      IF ((kp_odd .eq. 0) .and. lstell_sym) THEN
          kmax = MAX(kmax,kp2 + 1)
       ENDIF
       ALLOCATE (phi_array(kmax))
       r_ave = (rmax + rmin) / 2.
       z_ave = (zmax + zmin) / 2.
       DO k = 1, kmax
-         phi_array(k) = (k-1) * delp
+         phi_array(k) = (k - 1)*delp
       END DO
       CALL init_symmetry
       DO icoll = 1, SIZE(coil_group)
-         CALL coil_group_report(coil_group(icoll),icoll,r_ave,z_ave            &
-     &      ,kmax,phi_array(1:kmax))
+         CALL coil_group_report(coil_group(icoll), icoll, r_ave, z_ave,        &
+     &                          kmax, phi_array(1:kmax))
       END DO
       DEALLOCATE (phi_array)
-      WRITE(*,'(/80("*"))')
+      WRITE (*,'(/80("*"))')
 
 !-----------------------------------------------
 !  Clean up and finish
@@ -989,17 +1029,17 @@
       DEALLOCATE (extcur)
       
  200  FORMAT(/,
-     1  ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN SCALED',
-     2  ' MODE. THE EXTERNAL',/,' CURRENTS CORRESPONDING TO THOSE',
-     3  ' IN THE COILS-DOT FILE',/,' ARE GIVEN IN THE EXTCUR ARRAY IN',
-     4  ' THE FILE',1x,a,'. THEY SHOULD BE ENTERED INTO THE VMEC',
-     5  ' INPUT (INDATA) FILE.'/)
+     &       ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN SCALED',
+     &       ' MODE. THE EXTERNAL',/,' CURRENTS CORRESPONDING TO THOSE',
+     &       ' IN THE COILS-DOT FILE',/,' ARE GIVEN IN THE EXTCUR ARRAY',
+     &       ' IN THE FILE',1x,a,'. THEY SHOULD BE ENTERED INTO THE',
+     &       ' VMEC INPUT (INDATA) FILE.'/)
  205  FORMAT(/,
-     1  ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN RAW MODE.',
-     2 /' THE USER MUST PROVIDE THE EXTCUR ARRAY VALUES FOR THE',
-     3  ' VMEC INPUT (INDATA) FILE.',
-     4 /' CHOOSING EXTCUR=1 CORRESPONDS TO THE CURRENTS PRESENT',
-     5  ' IN THE COILS FILE.')
+     &       ' THE BFIELDS HAVE BEEN STORED IN THE MGRID FILE IN RAW',
+     &       /' MODE. THE USER MUST PROVIDE THE EXTCUR ARRAY VALUES FOR',
+     &       ' THE VMEC INPUT (INDATA) FILE.',
+     &       /' CHOOSING EXTCUR=1 CORRESPONDS TO THE CURRENTS PRESENT',
+     &       ' IN THE COILS FILE.')
 
       
       END SUBROUTINE task_mgrid_rs
@@ -1022,11 +1062,11 @@
       USE stel_constants
       
       USE write_mgrid, only: mgrid_ext, mgrid_mode, lstell_sym,                &
-     &   rmin, rmax, zmin, zmax, kp, ir, jz,                                   & 
-     &   coil_file, nextcur
+     &                       rmin, rmax, zmin, zmax, kp, ir, jz,               &
+     &                       coil_file, nextcur
 
       USE makegrid_global, only: task, rmajor, aminor, nphi, ntheta,           &
-     &   extcur_mgrid, nextcur_dim
+     &                           extcur_mgrid, nextcur_dim
 
       USE biotsavart
        !  , only: coil_group
@@ -1039,15 +1079,37 @@
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
       
-      REAL(rprec), DIMENSION(3) :: x
-      REAL(rprec), DIMENSION(3) :: btot, bdum
-      REAL(rprec) :: tfrac, pfrac, brr, bpp, brout, btheta
-      REAL(rprec) :: cost, sint, cosp, sinp, norm
-      REAL(rprec) :: imagr, imagp, imagt, realr, realp, realt
-      REAL(rprec), DIMENSION(nphi,ntheta,2) :: brf, bpf, bthetaf
-      CHARACTER(LEN=80) :: ctg_file
-      INTEGER :: i, j, k, nmode, mmode
-      INTEGER, PARAMETER :: ctg_iou=17, fp=5
+      REAL (rprec), DIMENSION(3)             :: x
+      REAL (rprec), DIMENSION(3)             :: btot
+      REAL (rprec), DIMENSION(3)             :: bdum
+      REAL (rprec)                           :: tfrac
+      REAL (rprec)                           :: pfrac
+      REAL (rprec)                           :: brr
+      REAL (rprec)                           :: bpp
+      REAL (rprec)                           :: brout
+      REAL (rprec)                           :: btheta
+      REAL (rprec)                           :: cost
+      REAL (rprec)                           :: sint
+      REAL (rprec)                           :: cosp
+      REAL (rprec)                           :: sinp
+      REAL (rprec)                           :: norm
+      REAL (rprec)                           :: imagr
+      REAL (rprec)                           :: imagp
+      REAL (rprec)                           :: imagt
+      REAL (rprec)                           :: realr
+      REAL (rprec)                           :: realp
+      REAL (rprec)                           :: realt
+      REAL (rprec), DIMENSION(nphi,ntheta,2) :: brf
+      REAL (rprec), DIMENSION(nphi,ntheta,2) :: bpf
+      REAL (rprec), DIMENSION(nphi,ntheta,2) :: bthetaf
+      CHARACTER (LEN=80)                     :: ctg_file
+      INTEGER                                :: i
+      INTEGER                                :: j
+      INTEGER                                :: k
+      INTEGER                                :: nmode
+      INTEGER                                :: mmode
+      INTEGER, PARAMETER                     :: ctg_iou = 17
+      INTEGER, PARAMETER                     :: fp = 5
       !fp=5, do one field period and multiply phi mode numbers by 5
       !fp=1, do all field periods
       
@@ -1066,105 +1128,105 @@
 !  Start of Executable Code
 !-----------------------------------------------
 
-      WRITE(*,*) ' Running makegrid with the following parameters:'
-      WRITE(*,*) '   task      = ', task
-      WRITE(*,*) '   mgrid_ext = ', mgrid_ext
-      WRITE(*,*) '   rmajor    = ', rmajor
-      WRITE(*,*) '   aminor    = ', aminor
-      WRITE(*,*) '   nphi      = ', nphi
-      WRITE(*,*) '   ntheta    = ', ntheta
-      WRITE(*,*)
+      WRITE (*,*) ' Running makegrid with the following parameters:'
+      WRITE (*,*) '   task      = ', task
+      WRITE (*,*) '   mgrid_ext = ', mgrid_ext
+      WRITE (*,*) '   rmajor    = ', rmajor
+      WRITE (*,*) '   aminor    = ', aminor
+      WRITE (*,*) '   nphi      = ', nphi
+      WRITE (*,*) '   ntheta    = ', ntheta
+      WRITE (*,*)
       
       coil_file = 'coils.' // TRIM(mgrid_ext)
       WRITE (6, *) 'Input  file: ',TRIM(coil_file)
       
       ctg_file = 'ctg.'// TRIM(mgrid_ext)
-      WRITE(*,*) 'CTG file: ', TRIM(ADJUSTL(ctg_file))
-      OPEN(UNIT=ctg_iou, FILE=TRIM(ADJUSTL(ctg_file)))
+      WRITE (*,*) 'CTG file: ', TRIM(ADJUSTL(ctg_file))
+      OPEN (UNIT=ctg_iou, FILE=TRIM(ADJUSTL(ctg_file)))
       
       CALL parse_coils_file(coil_file)
       nextcur = SIZE(coil_group)
       
-      x=(/0.0,0.0,0.0/)
+      x = (/0.0,0.0,0.0/)
       
-      WRITE(ctg_iou,*) 'Fourier coefficients of magnetic field.'
-      WRITE(ctg_iou,*) 'This magnetic geometry is 5 fold periodic in ',        &
-     &                 'phi.  Only modes which preserve this ',                &
-     &                 'periodicity are kept.'
-      WRITE(ctg_iou,*) 'If the field is stellarator symmetric, the ',          &
-     &                 'Fourier transform can be expressed in terms ',         &
-     &                 'of only sines or only cosines.'
-      WRITE(ctg_iou,*)
-      WRITE(ctg_iou,*) 'Major radius: R0 = ', rmajor
-      WRITE(ctg_iou,*) 'Minor radius: a = ', aminor
-      WRITE(ctg_iou,*) 'nphi (number of points in phi) = ', nphi
-      WRITE(ctg_iou,*) 'ntheta (number of points in theta) = ', ntheta
-      WRITE(ctg_iou,*)
-      WRITE(ctg_iou,*) 'Coordinate system:'
-      WRITE(ctg_iou,*) 'r = SQRT((SQRT(x**2+y**2)-R0**2)**2+z**2)'
-      WRITE(ctg_iou,*) 'THETA = ARCSIN(z/(SQRT(x**2+y**2)-R0)'
-      WRITE(ctg_iou,*) 'PHI = ARCTAN(y/x)'
-      WRITE(ctg_iou,*) 'Br = B.r_hat'
-      WRITE(ctg_iou,*) 'Btheta = B.theta_hat'
-      WRITE(ctg_iou,*) 'Bphi = B.phi_hat'
-      WRITE(ctg_iou,*)
-      WRITE(ctg_iou,*) 'The magnetic field is given by'
-      WRITE(ctg_iou,*) 'Br(theta,phi) = 1/SQRT(ntheta*nphi) Sum_over_',        &
-     &                 'm_and_n (BR_smn * (SIN(m*theta+n*phi))'
-      WRITE(ctg_iou,*) 'Bphi(theta,phi) = 1/SQRT(ntheta*nphi) Sum_over_'       &
-     &                 ,'m_and_n (BPHI_cmn * (COS(m*theta+n*phi))'
-      WRITE(ctg_iou,*) 'Btheta(theta,phi) = 1/SQRT(ntheta*nphi) Sum_',         &
-     &                 'over_m_and_n(BTHETA_cmn * (COS(m*theta+n*phi))'
-      WRITE(ctg_iou,*) 'Where the subscripts "cmn" and"smn" is ',              &
-     &                 'shorthand for the trig function involved ("c" ',       &
-     &                 'or "s") and the mode number ("m", "n)'
+      WRITE (ctg_iou,*) 'Fourier coefficients of magnetic field.'
+      WRITE (ctg_iou,*) 'This magnetic geometry is 5 fold periodic in ',       &
+     &                  'phi.  Only modes which preserve this ',               &
+     &                  'periodicity are kept.'
+      WRITE (ctg_iou,*) 'If the field is stellarator symmetric, the ',         &
+     &                  'Fourier transform can be expressed in terms ',        &
+     &                  'of only sines or only cosines.'
+      WRITE (ctg_iou,*)
+      WRITE (ctg_iou,*) 'Major radius: R0 = ', rmajor
+      WRITE (ctg_iou,*) 'Minor radius: a = ', aminor
+      WRITE (ctg_iou,*) 'nphi (number of points in phi) = ', nphi
+      WRITE (ctg_iou,*) 'ntheta (number of points in theta) = ', ntheta
+      WRITE (ctg_iou,*)
+      WRITE (ctg_iou,*) 'Coordinate system:'
+      WRITE (ctg_iou,*) 'r = SQRT((SQRT(x**2+y**2)-R0**2)**2+z**2)'
+      WRITE (ctg_iou,*) 'THETA = ARCSIN(z/(SQRT(x**2+y**2)-R0)'
+      WRITE (ctg_iou,*) 'PHI = ARCTAN(y/x)'
+      WRITE (ctg_iou,*) 'Br = B.r_hat'
+      WRITE (ctg_iou,*) 'Btheta = B.theta_hat'
+      WRITE (ctg_iou,*) 'Bphi = B.phi_hat'
+      WRITE (ctg_iou,*)
+      WRITE (ctg_iou,*) 'The magnetic field is given by'
+      WRITE (ctg_iou,*) 'Br(theta,phi) = 1/SQRT(ntheta*nphi) Sum_over_',       &
+     &                  'm_and_n (BR_smn * (SIN(m*theta+n*phi))'
+      WRITE (ctg_iou,*) 'Bphi(theta,phi) = 1/SQRT(ntheta*nphi)' //             &
+     &                  'Sum_over_m_and_n(BPHI_cmn*COS(m*theta+n*phi))'
+      WRITE (ctg_iou,*) 'Btheta(theta,phi) = 1/SQRT(ntheta*nphi) Sum_',        &
+     &                  'over_m_and_n(BTHETA_cmn * (COS(m*theta+n*phi))'
+      WRITE (ctg_iou,*) 'Where the subscripts "cmn" and"smn" is ' //           &
+     &                  'shorthand for the trig function involved ' //         &
+     &                  '("c" or "s") and the mode number ("m", "n)'
 
-      WRITE(ctg_iou,*)
-      WRITE(ctg_iou,245) "N","M","BR_smn","BPHI_cmn","BTHETA_cmn"
+      WRITE (ctg_iou,*)
+      WRITE (ctg_iou,245) "N","M","BR_smn","BPHI_cmn","BTHETA_cmn"
 
 ! Test to make sure that nextcur <= nextcur_dim
       
-      IF(nextcur .gt. nextcur_dim) THEN
+      IF (nextcur .gt. nextcur_dim) THEN
          WRITE(*,*) 'Number of coils greater than default number of ',         &
      &              'currents.'
          STOP
       END IF
 ! nphi, toroidal
 ! ntheta, poloidal
-      DO i=1, nphi
-         pfrac=(i-1)*1.0/nphi
-         DO j=1, ntheta
-            tfrac=(j-1)*1.0/ntheta
+      DO i = 1, nphi
+         pfrac = (i - 1)*1.0/nphi
+         DO j = 1, ntheta
+            tfrac = (j - 1)*1.0/ntheta
             
 ! Define spatial position to calculate field
-            cost=COS(twopi*tfrac)
-            sint=SIN(twopi*tfrac)
-            cosp=COS(twopi*pfrac/fp)
-            sinp=SIN(-twopi*pfrac/fp)
-            x(1)=(rmajor+aminor*cost)*cosp
-            x(2)=(rmajor+aminor*cost)*sinp
-            x(3)=aminor*sint
+            cost = COS(twopi*tfrac)
+            sint = SIN(twopi*tfrac)
+            cosp = COS(twopi*pfrac/fp)
+            sinp = SIN(-twopi*pfrac/fp)
+            x(1) = (rmajor + aminor*cost)*cosp
+            x(2) = (rmajor + aminor*cost)*sinp
+            x(3) = aminor*sint
             
 ! Calculate field
-            btot=0
-            DO k=1, nextcur
-               CALL bsc_b(coil_group(k),x,bdum)
-               btot=btot+bdum*extcur_mgrid(k)
+            btot = 0
+            DO k = 1, nextcur
+               CALL bsc_b(coil_group(k), x, bdum)
+               btot = btot + bdum*extcur_mgrid(k)
             END DO
             
 ! Transform field to local normal coordinates
-            brr=btot(1)*cosp+btot(2)*sinp
-            brout=cost*brr+sint*btot(3)
-            btheta=-sint*brr+cost*btot(3)
-            bpp=-btot(1)*sinp+btot(2)*cosp
+            brr = btot(1)*cosp + btot(2)*sinp
+            brout = cost*brr + sint*btot(3)
+            btheta = -sint*brr + cost*btot(3)
+            bpp = -btot(1)*sinp + btot(2)*cosp
             
 ! Arrange fields for Fourier transform
-            brf(i,j,1)=brout
-            brf(i,j,2)=0
-            bpf(i,j,1)=bpp
-            bpf(i,j,2)=0
-            bthetaf(i,j,1)=btheta
-            bthetaf(i,j,2)=0
+            brf(i,j,1) = brout
+            brf(i,j,2) = 0
+            bpf(i,j,1) = bpp
+            bpf(i,j,2) = 0
+            bthetaf(i,j,1) = btheta
+            bthetaf(i,j,2) = 0
 
          END DO
       END DO
@@ -1176,68 +1238,67 @@
       
 !Arrange the data so that it runs from negative modes to positive modes and
 !write to output file
-      DO i=nphi/2+1, NPHI
-         DO j=NTHETA/2+1, NTHETA
+      DO i = nphi/2 + 1, NPHI
+         DO j = NTHETA/2 + 1, NTHETA
             
-            norm=SQRT(nphi*one)*SQRT(ntheta*one)
-            realr=brf(i,j,1)/norm
-            imagr=brf(i,j,2)/norm
-            realp=bpf(i,j,1)/norm
-            imagp=bpf(i,j,2)/norm
-            realt=bthetaf(i,j,1)/norm
-            imagt=bthetaf(i,j,2)/norm
+            norm = SQRT(nphi*one)*SQRT(ntheta*one)
+            realr = brf(i,j,1)/norm
+            imagr = brf(i,j,2)/norm
+            realp = bpf(i,j,1)/norm
+            imagp = bpf(i,j,2)/norm
+            realt = bthetaf(i,j,1)/norm
+            imagt = bthetaf(i,j,2)/norm
             
-            mmode=j-NTHETA-1
-            nmode=fp*(i-nphi-1)
+            mmode = j - NTHETA - 1
+            nmode = fp*(i - nphi - 1)
 
             WRITE(ctg_iou,240) nmode, mmode, -imagr, realp, realt
          END DO
-         DO j=1, NTHETA/2
+         DO j = 1, NTHETA/2
             
-            norm=SQRT(nphi*one)*SQRT(ntheta*one)
-            realr=brf(i,j,1)/norm
-            imagr=brf(i,j,2)/norm
-            realp=bpf(i,j,1)/norm
-            imagp=bpf(i,j,2)/norm
-            realt=bthetaf(i,j,1)/norm
-            imagt=bthetaf(i,j,2)/norm
+            norm = SQRT(nphi*one)*SQRT(ntheta*one)
+            realr = brf(i,j,1)/norm
+            imagr = brf(i,j,2)/norm
+            realp = bpf(i,j,1)/norm
+            imagp = bpf(i,j,2)/norm
+            realt = bthetaf(i,j,1)/norm
+            imagt = bthetaf(i,j,2)/norm
             
-            mmode=j-1
-            nmode=fp*(i-nphi-1)
+            mmode = j - 1
+            nmode = fp*(i - nphi - 1)
 
             WRITE(ctg_iou,240) nmode, mmode, -imagr, realp, realt
          END DO
       END DO
 
-      
-      DO i=1, NPHI/2
-         DO j=NTHETA/2+1, NTHETA
+      DO i = 1, NPHI/2
+         DO j = NTHETA/2 + 1, NTHETA
             
-            norm=SQRT(nphi*one)*SQRT(ntheta*one)
-            realr=brf(i,j,1)/norm
-            imagr=brf(i,j,2)/norm
-            realp=bpf(i,j,1)/norm
-            imagp=bpf(i,j,2)/norm
-            realt=bthetaf(i,j,1)/norm
-            imagt=bthetaf(i,j,2)/norm
+            norm = SQRT(nphi*one)*SQRT(ntheta*one)
+            realr = brf(i,j,1)/norm
+            imagr = brf(i,j,2)/norm
+            realp = bpf(i,j,1)/norm
+            imagp = bpf(i,j,2)/norm
+            realt = bthetaf(i,j,1)/norm
+            imagt = bthetaf(i,j,2)/norm
             
-            mmode=j-NTHETA-1
-            nmode=fp*(i-1)
+            mmode = j - NTHETA - 1
+            nmode = fp*(i - 1)
 
             WRITE(ctg_iou,240) nmode, mmode, -imagr, realp, realt
          END DO
-         DO j=1, NTHETA/2
+         DO j = 1, NTHETA/2
             
-            norm=SQRT(nphi*one)*SQRT(ntheta*one)
-            realr=brf(i,j,1)/norm
-            imagr=brf(i,j,2)/norm
-            realp=bpf(i,j,1)/norm
-            imagp=bpf(i,j,2)/norm
-            realt=bthetaf(i,j,1)/norm
-            imagt=bthetaf(i,j,2)/norm
+            norm = SQRT(nphi*one)*SQRT(ntheta*one)
+            realr = brf(i,j,1)/norm
+            imagr = brf(i,j,2)/norm
+            realp = bpf(i,j,1)/norm
+            imagp = bpf(i,j,2)/norm
+            realt = bthetaf(i,j,1)/norm
+            imagt = bthetaf(i,j,2)/norm
             
-            mmode=j-1
-            nmode=fp*(i-1)
+            mmode = j - 1
+            nmode = fp*(i - 1)
 
             WRITE(ctg_iou,240) nmode, mmode, -imagr, realp, realt
          END DO
@@ -1254,7 +1315,7 @@
 !*******************************************************************************
 !----------------------------------------------------------------------
 !
-      SUBROUTINE coil_group_report(cg,igroup,rR,zZ,nphi,phi_array)
+      SUBROUTINE coil_group_report(cg, igroup, rR, zZ, nphi, phi_array)
 !  Subroutine to print out information about a coil group
 !  (Stored in a bsc_coilcoll)
 
@@ -1273,10 +1334,12 @@
 !   A R G U M E N T   V a r i a b l e s
 !-----------------------------------------------
       
-      TYPE (bsc_coilcoll),  INTENT(inout) :: cg
-      INTEGER, INTENT(in) :: igroup, nphi
-      REAL(rprec), INTENT(in) :: rR, zZ
-      REAL(rprec), DIMENSION(1:nphi), INTENT(in) :: phi_array
+      TYPE (bsc_coilcoll),  INTENT(inout)         :: cg
+      INTEGER, INTENT(in)                         :: igroup
+      INTEGER, INTENT(in)                         :: nphi
+      REAL (rprec), INTENT(in)                    :: rR
+      REAL (rprec), INTENT(in)                    :: zZ
+      REAL (rprec), DIMENSION(1:nphi), INTENT(in) :: phi_array
 
 !  cg          A bsc_coilcoll (hodling a coil group) to report on
 !  igroup      Coil group number (merely reported here)
@@ -1287,31 +1350,57 @@
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
-      REAL(rprec), PARAMETER :: big = 1.E40_rprec
-      INTEGER, PARAMETER :: int_big = 987654321
+      REAL (rprec), PARAMETER                     :: big = 1.E40_rprec
+      INTEGER, PARAMETER                          :: int_big = 987654321
 
-      INTEGER :: n_coil_fl, n_coil_fc, n_coil_other, nfil_max_fl,              &
-     &   nfil_min_fl, nfil_sum_fl, nfil_sumsq_fl
+      INTEGER                                     :: n_coil_fl
+      INTEGER                                     :: n_coil_fc
+      INTEGER                                     :: n_coil_other
+      INTEGER                                     :: nfil_max_fl
+      INTEGER                                     :: nfil_min_fl
+      INTEGER                                     :: nfil_sum_fl
+      INTEGER                                     :: nfil_sumsq_fl
 
-      INTEGER :: ic, ncoil, nfil, iphi, i
+      INTEGER                                     :: ic
+      INTEGER                                     :: ncoil
+      INTEGER                                     :: nfil
+      INTEGER                                     :: iphi
+      INTEGER                                     :: i
 
-      REAL(rprec) :: cur_max_fl, cur_min_fl, cur_sum_fl,                       &
-     &   cur_sumsq_fl, cur_max_fc, cur_min_fc, cur_sum_fc,                     &
-     &   cur_sumsq_fc, ave_nfil_fl, sd_nfil_fl, cur_ave_fl,                    &
-     &   cur_sd_fl, cur_ave_fc, cur_sd_fc
+      REAL (rprec)                                :: cur_max_fl
+      REAL (rprec)                                :: cur_min_fl
+      REAL (rprec)                                :: cur_sum_fl
+      REAL (rprec)                                :: cur_sumsq_fl
+      REAL (rprec)                                :: cur_max_fc
+      REAL (rprec)                                :: cur_min_fc
+      REAL (rprec)                                :: cur_sum_fc
+      REAL (rprec)                                :: cur_sumsq_fc
+      REAL (rprec)                                :: ave_nfil_fl
+      REAL (rprec)                                :: sd_nfil_fl
+      REAL (rprec)                                :: cur_ave_fl
+      REAL (rprec)                                :: cur_sd_fl
+      REAL (rprec)                                :: cur_ave_fc
+      REAL (rprec)                                :: cur_sd_fc
      
-      TYPE(bsc_coil), POINTER :: coil
+      TYPE(bsc_coil), POINTER                     :: coil
       
-      REAL(rprec), DIMENSION(3) :: x, b
+      REAL (rprec), DIMENSION(3)                  :: x
+      REAL (rprec), DIMENSION(3)                  :: b
       
-      REAL(rprec) :: c, s, br, bphi, bz, cur, phi
+      REAL (rprec)                                :: c
+      REAL (rprec)                                :: s
+      REAL (rprec)                                :: br
+      REAL (rprec)                                :: bphi
+      REAL (rprec)                                :: bz
+      REAL (rprec)                                :: cur
+      REAL (rprec)                                :: phi
 
 !-----------------------------------------------
 !  Start of Executable Code
 !-----------------------------------------------  
       
 !  Find out how many coils
-      ncoil = cg % ncoil
+      ncoil = cg%ncoil
       IF (ncoil .le. 0) THEN
          WRITE(*,4000)  igroup, cg % s_name
 4000  FORMAT(/80("*")/"No coils in coil group # ",i4,", group ID ",a30)
@@ -1339,87 +1428,87 @@
       cur_sumsq_fc = zero
 
 !  Loop over coils
-      DO ic = 1,ncoil
-         coil => cg % coils(ic)
-         cur = coil % current
+      DO ic = 1, ncoil
+         coil => cg%coils(ic)
+         cur = coil%current
 
 !  Different coding, depending on c_type
-         SELECT CASE (coil % c_type)
-         CASE ('fil_loop','floop')
-            n_coil_fl = n_coil_fl + 1
+         SELECT CASE (coil%c_type)
+            CASE ('fil_loop','floop')
+               n_coil_fl = n_coil_fl + 1
             
-            nfil = SIZE(coil % xnod,2) - 1
-            nfil_max_fl = MAX(nfil_max_fl,nfil)
-            nfil_min_fl = MIN(nfil_min_fl,nfil)
-            nfil_sum_fl = nfil_sum_fl + nfil
-            nfil_sumsq_fl = nfil_sumsq_fl + nfil * nfil
+               nfil = SIZE(coil%xnod,2) - 1
+               nfil_max_fl = MAX(nfil_max_fl, nfil)
+               nfil_min_fl = MIN(nfil_min_fl,nfil)
+               nfil_sum_fl = nfil_sum_fl + nfil
+               nfil_sumsq_fl = nfil_sumsq_fl + nfil*nfil
             
-            cur_max_fl = MAX(cur_max_fl,cur)
-            cur_min_fl = MIN(cur_min_fl,cur)
-            cur_sum_fl = cur_sum_fl + cur
-            cur_sumsq_fl = cur_sumsq_fl + cur * cur
+               cur_max_fl = MAX(cur_max_fl,cur)
+               cur_min_fl = MIN(cur_min_fl,cur)
+               cur_sum_fl = cur_sum_fl + cur
+               cur_sumsq_fl = cur_sumsq_fl + cur*cur
 
-         CASE ('fil_circ','fcirc')
-            n_coil_fc = n_coil_fc + 1
-            cur_max_fc = MAX(cur_max_fc,cur)
-            cur_min_fc = MIN(cur_min_fc,cur)
-            cur_sum_fc = cur_sum_fc + cur
-            cur_sumsq_fc = cur_sumsq_fc + cur * cur
+            CASE ('fil_circ','fcirc')
+               n_coil_fc = n_coil_fc + 1
+               cur_max_fc = MAX(cur_max_fc,cur)
+               cur_min_fc = MIN(cur_min_fc,cur)
+               cur_sum_fc = cur_sum_fc + cur
+               cur_sumsq_fc = cur_sumsq_fc + cur*cur
          
-         CASE DEFAULT
-            n_coil_other = n_coil_other + 1
+            CASE DEFAULT
+               n_coil_other = n_coil_other + 1
          
          END SELECT
       END DO
       
-      ave_nfil_fl = nfil_sum_fl * one / MAX(n_coil_fl,1)
-      sd_nfil_fl = SQRT(nfil_sumsq_fl * one / MAX(n_coil_fl,1) -               &
-     &   ave_nfil_fl ** 2)
-      cur_ave_fl = cur_sum_fl / MAX(n_coil_fl,1)
-      cur_sd_fl =  SQRT(cur_sumsq_fl / MAX(n_coil_fl,1) -                      &
-     &   cur_ave_fl ** 2)
-      cur_ave_fc = cur_sum_fc / MAX(n_coil_fc,1)
-      cur_sd_fc =  SQRT(cur_sumsq_fc / MAX(n_coil_fc,1) -                      &
-     &   cur_ave_fc ** 2)
+      ave_nfil_fl = nfil_sum_fl*one/MAX(n_coil_fl,1)
+      sd_nfil_fl = SQRT(nfil_sumsq_fl*one/MAX(n_coil_fl,1) -                   &
+     &                  ave_nfil_fl**2)
+      cur_ave_fl = cur_sum_fl/MAX(n_coil_fl,1)
+      cur_sd_fl =  SQRT(cur_sumsq_fl/MAX(n_coil_fl,1) -                        &
+     &                  cur_ave_fl**2)
+      cur_ave_fc = cur_sum_fc/MAX(n_coil_fc,1)
+      cur_sd_fc = SQRT(cur_sumsq_fc/MAX(n_coil_fc,1) -                         &
+     &                 cur_ave_fc**2)
 
 !  Write out results for all coils
-      WRITE(*,5000)  
-      WRITE(*,5100) n_coil_fl, n_coil_fc, n_coil_other, ncoil
+      WRITE (*,5000)
+      WRITE (*,5100) n_coil_fl, n_coil_fc, n_coil_other, ncoil
       
       IF (n_coil_fl .gt. 0) THEN
-         WRITE(*,5200) nfil_min_fl, nfil_max_fl, ave_nfil_fl,                  &
-     &      sd_nfil_fl
-         WRITE(*,5300) cur_min_fl, cur_max_fl, cur_ave_fl, cur_sd_fl
+         WRITE (*,5200) nfil_min_fl, nfil_max_fl, ave_nfil_fl,                 &
+     &                  sd_nfil_fl
+         WRITE (*,5300) cur_min_fl, cur_max_fl, cur_ave_fl, cur_sd_fl
       ENDIF
       
       IF (n_coil_fc .gt. 0) THEN
-         WRITE(*,5400) cur_min_fc, cur_max_fc, cur_ave_fc, cur_sd_fc
+         WRITE (*,5400) cur_min_fc, cur_max_fc, cur_ave_fc, cur_sd_fc
       ENDIF
 
 5000  FORMAT(/"               Loops     Circles   Other   Total")
 5100  FORMAT(" # coils ",4(3x,i7))
 5200  FORMAT(/" Filamentary loops, number of filaments:"/                      &
-     &     "      Min     Max      Average          SD "/                      &
-     &   i8,3x,i8,2(2x,f11.1))
+     &       "      Min     Max      Average          SD "/                    &
+     &       i8,3x,i8,2(2x,f11.1))
 5300  FORMAT(/" Filamentary loops, current:"/                                  &
-     &     "      Min          Max         Average          SD "/              &
-     &   3(2x,es12.5),2x,es9.2)
+     &       "      Min          Max         Average          SD "/            &
+     &       3(2x,es12.5),2x,es9.2)
 5400  FORMAT(/" Filamentary circles, current:"/                                &
-     &     "      Min          Max         Average          SD "/              &
-     &   3(2x,es12.5),2x,es9.2)
+     &       "      Min          Max         Average          SD "/            &
+     &       3(2x,es12.5),2x,es9.2)
      
 !  Loop over phi values
       WRITE(*,6000) rR, zZ
-      DO iphi = 1,nphi
+      DO iphi = 1, nphi
          phi = phi_array(iphi)
          c = COS(phi)
          s = SIN(phi)
-         x(1) = rR * c
-         x(2) = rR * s
+         x(1) = rR*c
+         x(2) = rR*s
          x(3) = zZ
-         CALL bsc_b(cg,x,b)
-         br = b(1) * c + b(2) * s
-         bphi = - b(1) * s + b(2) * c
+         CALL bsc_b(cg, x, b)
+         br = b(1)*c + b(2)*s
+         bphi = -b(1)*s + b(2)*c
          bz = b(3)
          WRITE(*,6100) phi, br, bphi, bz
       END DO
@@ -1427,8 +1516,8 @@
       CALL check_symmetry(igroup)
 
 6000  FORMAT(/"Magnetic field with unit current multiplier, at R,Z=",          &
-     &   2(2x,es12.5)/t7,"phi",t24,"B . rhat",t38,"B . phihat",                &
-     &   t52,"B . zhat")
+     &       2(2x,es12.5)/t7,"phi",t24,"B . rhat",t38,"B . phihat",            &
+     &       t52,"B . zhat")
 6100  FORMAT(4(3x,es12.5))
       
       END SUBROUTINE coil_group_report
@@ -1457,66 +1546,80 @@
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
       
-      REAL(rprec), DIMENSION(:,:,:) :: dat
-      REAL(rprec), DIMENSION(:), ALLOCATABLE :: a, trigs, work
-      INTEGER :: N, i, inc, jump, lot, isign, j
-      INTEGER, DIMENSION(13) :: ifax
+      REAL (rprec), DIMENSION(:,:,:)          :: dat
+      REAL (rprec), DIMENSION(:), ALLOCATABLE :: a
+      REAL (rprec), DIMENSION(:), ALLOCATABLE :: trigs
+      REAL (rprec), DIMENSION(:), ALLOCATABLE :: work
+      INTEGER                                 :: N
+      INTEGER                                 :: i
+      INTEGER                                 :: inc
+      INTEGER                                 :: jump
+      INTEGER                                 :: lot
+      INTEGER                                 :: isign
+      INTEGER                                 :: j
+      INTEGER, DIMENSION(13)                  :: ifax
       
 !-----------------------------------------------
 !  Start of Executable Code
 !-----------------------------------------------
 
-      N=SIZE(dat,1)
-      isign=-1  !Sign of exponent in transform
-      lot=SIZE(dat,2)
-      jump=N  !Number to skip between data vectors.  Since we only do
-              !one transform at a time, it shouldn't matter, but it
-              !seems to have problems for values larger than N
-      inc=1   !Number of array spaces between value pairs
+      N = SIZE(dat,1)
+      isign = -1  !Sign of exponent in transform
+      lot = SIZE(dat,2)
+      jump = N  !Number to skip between data vectors.  Since we only do
+                !one transform at a time, it shouldn't matter, but it
+                !seems to have problems for values larger than N
+      inc = 1   !Number of array spaces between value pairs
       
       ALLOCATE(a(2*N))
       ALLOCATE(trigs(2*N))
       ALLOCATE(work(lot*N))
       
-      DO j=1, lot
-         DO i=1, N
+      DO j = 1, lot
+         DO i = 1, N
 !  The values are stored in a 1-d array with alternating real and imaginary
 !  parts.
-            a(2*i-1)=dat(i,j,1)
-            a(2*i)=dat(i,j,2)
+            a(2*i - 1) = dat(i,j,1)
+            a(2*i) = dat(i,j,2)
          END DO
 
 !  Do the transform
          CALL cftfax_g(N, ifax, trigs)
-         CALL cfft99(a,work,trigs, ifax, inc, jump, N, 1, isign)
+         CALL cfft99(a, work, trigs, ifax, inc, jump, N, 1, isign)
 
 !  Put the new values back into the input/output array
-         DO i=1, N
-            dat(i,j,1)=a(2*i-1)
+         DO i = 1, N
+            dat(i,j,1)=a(2*i - 1)
             dat(i,j,2)=a(2*i)
          END DO
       END DO
 
 !  Reallocate to do the transform in the other index
-      IF(ALLOCATED(a)) DEALLOCATE(a)
+      IF (ALLOCATED(a)) THEN
+         DEALLOCATE(a)
+      END IF
       ALLOCATE(a(2*lot))
-      IF(ALLOCATED(trigs)) DEALLOCATE(trigs)
+      IF (ALLOCATED(trigs)) THEN
+         DEALLOCATE(trigs)
+      END IF
       ALLOCATE(trigs(2*lot))
-      IF(ALLOCATED(work)) DEALLOCATE(work)
+      IF (ALLOCATED(work)) THEN
+         DEALLOCATE(work)
+      END IF
       ALLOCATE(work(lot*N))
 
-      DO i=1, N
-         DO j=1, lot
-            a(2*j-1)=dat(i,j,1)
-            a(2*j)=dat(i,j,2)
+      DO i = 1, N
+         DO j = 1, lot
+            a(2*j - 1) = dat(i,j,1)
+            a(2*j) = dat(i,j,2)
          END DO
 
          CALL cftfax_g(lot, ifax, trigs)
-         CALL cfft99(a,work,trigs, ifax, inc, jump, lot, 1, isign)
+         CALL cfft99(a, work, trigs, ifax, inc, jump, lot, 1, isign)
 
          DO j=1, lot
-            dat(i,j,1)=a(2*j-1)
-            dat(i,j,2)=a(2*j)
+            dat(i,j,1) = a(2*j - 1)
+            dat(i,j,2) = a(2*j)
          END DO
       END DO
       
