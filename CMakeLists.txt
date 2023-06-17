@@ -6,14 +6,16 @@ find_package (OpenMP)
 
 add_executable (mgrid)
 
-target_link_libraries (mgrid 
+target_link_libraries (mgrid
                        
-                       PUBLIC 
+                       PUBLIC
                        stell
                        $<$<BOOL:${OpenMP_Fortran_FOUND}>:OpenMP::OpenMP_Fortran>
 )
 
 add_subdirectory (Sources)
+
+install (TARGETS mgrid)
 
 ################################################################################
 #  Testing                                                                     #
