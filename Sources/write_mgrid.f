@@ -4,7 +4,7 @@
      &                     vn_jz, vn_kp, vn_nfp, vn_rmin, vn_rmax,             &
      &                     vn_zmin, vn_zmax, vn_coilgrp, vn_coilcur,           &
      &                     vn_br0, vn_bz0, vn_bp0, vn_ar0, vn_az0,             &
-     &                     vn_ap0
+     &                     vn_ap0, vn_coilfile_name, ln_coilfile_name
       IMPLICIT NONE
 C-----------------------------------------------
 C   L o c a l   P a r a m e t e r s
@@ -92,6 +92,8 @@ C-----------------------------------------------
       CALL cdf_define(ngrid, vn_zmin, zmin)
       CALL cdf_define(ngrid, vn_rmax, rmax)
       CALL cdf_define(ngrid, vn_zmax, zmax)
+      CALL cdf_define(ngrid, vn_coilfile_name, coil_file)
+      CALL cdf_setatt(ngrid, ln_coilfile_name)
       IF (nextcur .eq. 1) THEN
          CALL cdf_define(ngrid, vn_coilgrp,coil_group(1)%s_name)
       ELSE IF (use_eddy) THEN
@@ -142,6 +144,7 @@ C-----------------------------------------------
       CALL cdf_write(ngrid, vn_zmin, zmin)
       CALL cdf_write(ngrid, vn_rmax, rmax)
       CALL cdf_write(ngrid, vn_zmax, zmax)
+      CALL cdf_write(ngrid, vn_coilfile_name, coil_file)
       IF (nextcur .eq. 1) THEN
          CALL cdf_write(ngrid, vn_coilgrp, coil_group(1)%s_name)
       ELSE IF (use_eddy) THEN
