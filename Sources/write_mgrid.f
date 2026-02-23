@@ -50,7 +50,6 @@ C-----------------------------------------------
       CHARACTER (LEN=70)                            :: coil_file
       CHARACTER (LEN=60)                            :: mgrid_ext
       LOGICAL                                       :: use_eddy
-      CHARACTER (len=30), DIMENSION(:), ALLOCATABLE :: temp_sname
 
       PRIVATE                                       :: istat
 C-----------------------------------------------
@@ -72,6 +71,7 @@ C-----------------------------------------------
       CHARACTER (LEN=100), ALLOCATABLE, DIMENSION(:) :: vn_ar
       CHARACTER (LEN=100), ALLOCATABLE, DIMENSION(:) :: vn_ap
       CHARACTER (LEN=100), ALLOCATABLE, DIMENSION(:) :: vn_az
+      CHARACTER (len=30), ALLOCATABLE, DIMENSION(:)  :: temp_sname
 C-----------------------------------------------
       mgrid_file = TRIM(mgrid_file) // '.nc'
 
@@ -94,17 +94,16 @@ C-----------------------------------------------
       CALL cdf_define(ngrid, vn_zmax, zmax)
       CALL cdf_define(ngrid, vn_coilfile_name, coil_file)
       CALL cdf_setatt(ngrid, ln_coilfile_name)
-      IF (nextcur .eq. 1) THEN
-         CALL cdf_define(ngrid, vn_coilgrp,coil_group(1)%s_name)
-      ELSE IF (use_eddy) THEN
-         ALLOCATE(temp_sname(nextcur))
-         temp_sname(1:nextcur - 1) = coil_group(1:nextcur - 1)%s_name
-         temp_sname(nextcur) = 'Eddy currents'
-         CALL cdf_define(ngrid, vn_coilgrp, temp_sname, dimname=coildim)
-      ELSE
-         CALL cdf_define(ngrid, vn_coilgrp,coil_group(1:nextcur)%s_name,
-     &                   dimname=coildim)
+
+      IF (use_eddy) THEN
+         coil_group(-1)%s_name = 'Eddy currents'
       END IF
+      ALLOCATE(temp_sname(nextcur))
+      DO ig = 1, nextcur
+         temp_sname(ig) = coil_group(ig)%s_name
+      END DO
+      CALL cdf_define(ngrid, vn_coilgrp, temp_sname, dimname=coildim)
+
       CALL cdf_define(ngrid, vn_mgmode, mgrid_mode)
       CALL cdf_define(ngrid, vn_coilcur, extcur(1:nextcur),
      &                dimname=groupdim)
@@ -131,7 +130,6 @@ C-----------------------------------------------
          CALL cdf_define(ngrid, vn_az(ig), az, dimname=cylcoord)
       END DO
 
-
 !
 !     WRITE OUT DATA
 !
@@ -145,14 +143,8 @@ C-----------------------------------------------
       CALL cdf_write(ngrid, vn_rmax, rmax)
       CALL cdf_write(ngrid, vn_zmax, zmax)
       CALL cdf_write(ngrid, vn_coilfile_name, coil_file)
-      IF (nextcur .eq. 1) THEN
-         CALL cdf_write(ngrid, vn_coilgrp, coil_group(1)%s_name)
-      ELSE IF (use_eddy) THEN
-         CALL cdf_write(ngrid, vn_coilgrp, temp_sname)
-         DEALLOCATE(temp_sname)
-      ELSE
-         CALL cdf_write(ngrid, vn_coilgrp, coil_group(1:nextcur)%s_name)
-      END IF
+      CALL cdf_write(ngrid, vn_coilgrp, temp_sname)
+      DEALLOCATE(temp_sname)
 
 !
 !     SET UP CYLINDRICAL COMPONENTS OF MAGNETIC FIELD ON GRID
