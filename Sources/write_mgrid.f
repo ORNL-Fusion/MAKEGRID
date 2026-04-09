@@ -303,10 +303,12 @@ C-----------------------------------------------
       WRITE (6, '(a,i6,a,i6)') ' TOTAL COILS IN GROUP: ', numcoils,            &
      &                         ' TOTAL FILAMENTS: ', numfils
 
+!$omp parallel default(shared) private(i, j, k, zee, rad, phi)
+
       k = 1                     ! this is always a symmetry plane
       phi = (k - 1)*delp
 
-!$omp parallel do private(i, j, zee, rad)
+!$omp do
       DO j = 1, jz2 + jz_odd
          zee = zmin + (j - 1)*delz
          DO i = 1, ir
@@ -331,12 +333,14 @@ C-----------------------------------------------
 
          END DO
       END DO
-!$omp end parallel do
+!$omp end do
       IF (kp .ne. 1) THEN
+!$omp single
          WRITE (6, '(a,i4,a,i4,a)') ' K = ',k,' (OUT OF ',KP,')'
+!$omp end single
       END IF
 
-!$omp parallel do private(i, j, k, zee, rad, phi)
+!$omp do
       DO k = 2, kp2 + kp_odd
          phi = (k - 1)*delp
          DO j = 1, jz
@@ -362,12 +366,12 @@ C-----------------------------------------------
          END DO
          WRITE (6,'(a,i4)') ' K = ',k
       END DO
-!$omp end parallel do
+!$omp end do
 
       IF ((kp_odd .eq. 0) .and. lstell_sym) THEN       ! another symmetry plane
          k = kp2 + 1
          phi = (k - 1)*delp
-!$omp parallel do private(i, j, zee, rad)
+!$omp do
          DO j = 1, jz2 + jz_odd
             zee = zmin + (j - 1)*delz
             DO i = 1, ir
@@ -385,9 +389,12 @@ C-----------------------------------------------
                ap(i,jz + 1 - j,k) =  ap(i,j,k)
             END DO
          END DO
-!$omp end parallel do
+!$omp end do
+!$omp single
          WRITE (6,'(a,i4)') ' K = ',k
+!$omp end single
       END IF
+!$omp end parallel
 
       IF (mgrid_mode .eq. 'R') THEN
 !  JDH 2011-080-16. Comment out below (1 line)
