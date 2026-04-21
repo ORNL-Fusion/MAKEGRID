@@ -303,98 +303,133 @@ C-----------------------------------------------
       WRITE (6, '(a,i6,a,i6)') ' TOTAL COILS IN GROUP: ', numcoils,            &
      &                         ' TOTAL FILAMENTS: ', numfils
 
+!     Parallel grid fill: use collapsed trip loops when no symmetry fill is
+!     required so each (i,j,k) is written by exactly one iteration (OpenMP-safe).
+      IF (.not. lstell_sym) THEN
+
 !$omp parallel default(shared) private(i, j, k, zee, rad, phi)
-
-      k = 1                     ! this is always a symmetry plane
-      phi = (k - 1)*delp
-
-!$omp do
-      DO j = 1, jz2 + jz_odd
-         zee = zmin + (j - 1)*delz
-         DO i = 1, ir
-            rad = rmin + (i - 1)*delr
-            CALL bfield(rad, phi, zee, br(i,j,k),
-     &                  bp(i,j,k), bz(i,j,k), ig)
-
-            IF (lstell_sym) THEN
-               br(i,jz + 1 - j,k) = -br(i,j,k)
-               bz(i,jz + 1 - j,k) =  bz(i,j,k)
-               bp(i,jz + 1 - j,k) =  bp(i,j,k)
-            END IF
-
-            CALL afield (rad, phi, zee, ar(i,j,k),                             &
-     &                   ap(i,j,k), az(i,j,k), ig)
-
-            IF (lstell_sym) THEN
-               ar(i,jz + 1 - j,k) = -ar(i,j,k)
-               az(i,jz + 1 - j,k) =  az(i,j,k)
-               ap(i,jz + 1 - j,k) =  ap(i,j,k)
-            END IF
-
-         END DO
-      END DO
-!$omp end do
-      IF (kp .ne. 1) THEN
-!$omp single
-         WRITE (6, '(a,i4,a,i4,a)') ' K = ',k,' (OUT OF ',KP,')'
-!$omp end single
-      END IF
-
-!$omp do
-      DO k = 2, kp2 + kp_odd
-         phi = (k - 1)*delp
-         DO j = 1, jz
-            zee = zmin + (j - 1)*delz
-            DO i = 1, ir
-               rad = rmin + (i - 1)*delr
-               CALL bfield(rad, phi, zee, br(i,j,k),                           &
-     &                     bp(i,j,k), bz(i,j,k), ig)
-               IF (lstell_sym) THEN
-                  br(i,jz + 1 - j,kp + 2 - k) = -br(i,j,k)
-                  bz(i,jz + 1 - j,kp + 2 - k) =  bz(i,j,k)
-                  bp(i,jz + 1 - j,kp + 2 - k) =  bp(i,j,k)
-               END IF
-
-               CALL afield(rad, phi, zee, ar(i,j,k),                           &
-     &                     ap(i,j,k), az(i,j,k), ig)
-               IF (lstell_sym) THEN
-                  ar(i,jz + 1 - j,kp + 2 - k) = -ar(i,j,k)
-                  az(i,jz + 1 - j,kp + 2 - k) =  az(i,j,k)
-                  ap(i,jz + 1 - j,kp + 2 - k) =  ap(i,j,k)
-               END IF
+!$omp do collapse(3) schedule(static)
+         DO k = 1, kp
+            DO j = 1, jz
+               DO i = 1, ir
+                  phi = (k - 1)*delp
+                  zee = zmin + (j - 1)*delz
+                  rad = rmin + (i - 1)*delr
+!     bfield/afield share Biot-Savart state; serialize for bit-identical output.
+!$omp critical(mgrid_bs_eval)
+                  CALL bfield(rad, phi, zee, br(i,j,k),                         &
+     &                        bp(i,j,k), bz(i,j,k), ig)
+                  CALL afield(rad, phi, zee, ar(i,j,k),                       &
+     &                        ap(i,j,k), az(i,j,k), ig)
+!$omp end critical(mgrid_bs_eval)
+               END DO
             END DO
          END DO
-         WRITE (6,'(a,i4)') ' K = ',k
-      END DO
 !$omp end do
+!$omp end parallel
 
-      IF ((kp_odd .eq. 0) .and. lstell_sym) THEN       ! another symmetry plane
-         k = kp2 + 1
+      ELSE
+
+!$omp parallel default(shared) private(i, j, k, zee, rad, phi)
+
+         k = 1                     ! this is always a symmetry plane
          phi = (k - 1)*delp
+
 !$omp do
          DO j = 1, jz2 + jz_odd
             zee = zmin + (j - 1)*delz
             DO i = 1, ir
                rad = rmin + (i - 1)*delr
-               CALL bfield(rad, phi, zee, br(i,j,k),                           &
+!$omp critical(mgrid_bs_eval)
+               CALL bfield(rad, phi, zee, br(i,j,k),
      &                     bp(i,j,k), bz(i,j,k), ig)
-               br(i,jz + 1 - j,k) = -br(i,j,k)
-               bz(i,jz + 1 - j,k) =  bz(i,j,k)
-               bp(i,jz + 1 - j,k) =  bp(i,j,k)
 
-               CALL afield (rad, phi, zee, ar(i,j,k),                          &
+               IF (lstell_sym) THEN
+                  br(i,jz + 1 - j,k) = -br(i,j,k)
+                  bz(i,jz + 1 - j,k) =  bz(i,j,k)
+                  bp(i,jz + 1 - j,k) =  bp(i,j,k)
+               END IF
+
+               CALL afield (rad, phi, zee, ar(i,j,k),                           &
      &                      ap(i,j,k), az(i,j,k), ig)
-               ar(i,jz + 1 - j,k) = -ar(i,j,k)
-               az(i,jz + 1 - j,k) =  az(i,j,k)
-               ap(i,jz + 1 - j,k) =  ap(i,j,k)
+
+               IF (lstell_sym) THEN
+                  ar(i,jz + 1 - j,k) = -ar(i,j,k)
+                  az(i,jz + 1 - j,k) =  az(i,j,k)
+                  ap(i,jz + 1 - j,k) =  ap(i,j,k)
+               END IF
+!$omp end critical(mgrid_bs_eval)
+
             END DO
          END DO
 !$omp end do
+         IF (kp .ne. 1) THEN
 !$omp single
-         WRITE (6,'(a,i4)') ' K = ',k
+            WRITE (6, '(a,i4,a,i4,a)') ' K = ',k,' (OUT OF ',KP,')'
 !$omp end single
-      END IF
+         END IF
+
+!$omp do
+         DO k = 2, kp2 + kp_odd
+            phi = (k - 1)*delp
+            DO j = 1, jz
+               zee = zmin + (j - 1)*delz
+               DO i = 1, ir
+                  rad = rmin + (i - 1)*delr
+!$omp critical(mgrid_bs_eval)
+                  CALL bfield(rad, phi, zee, br(i,j,k),                        &
+     &                        bp(i,j,k), bz(i,j,k), ig)
+                  IF (lstell_sym) THEN
+                     br(i,jz + 1 - j,kp + 2 - k) = -br(i,j,k)
+                     bz(i,jz + 1 - j,kp + 2 - k) =  bz(i,j,k)
+                     bp(i,jz + 1 - j,kp + 2 - k) =  bp(i,j,k)
+                  END IF
+
+                  CALL afield(rad, phi, zee, ar(i,j,k),                        &
+     &                        ap(i,j,k), az(i,j,k), ig)
+                  IF (lstell_sym) THEN
+                     ar(i,jz + 1 - j,kp + 2 - k) = -ar(i,j,k)
+                     az(i,jz + 1 - j,kp + 2 - k) =  az(i,j,k)
+                     ap(i,jz + 1 - j,kp + 2 - k) =  ap(i,j,k)
+                  END IF
+!$omp end critical(mgrid_bs_eval)
+               END DO
+            END DO
+            WRITE (6,'(a,i4)') ' K = ',k
+         END DO
+!$omp end do
+
+         IF ((kp_odd .eq. 0) .and. lstell_sym) THEN       ! another symmetry plane
+            k = kp2 + 1
+            phi = (k - 1)*delp
+!$omp do
+            DO j = 1, jz2 + jz_odd
+               zee = zmin + (j - 1)*delz
+               DO i = 1, ir
+                  rad = rmin + (i - 1)*delr
+!$omp critical(mgrid_bs_eval)
+                  CALL bfield(rad, phi, zee, br(i,j,k),                        &
+     &                        bp(i,j,k), bz(i,j,k), ig)
+                  br(i,jz + 1 - j,k) = -br(i,j,k)
+                  bz(i,jz + 1 - j,k) =  bz(i,j,k)
+                  bp(i,jz + 1 - j,k) =  bp(i,j,k)
+
+                  CALL afield (rad, phi, zee, ar(i,j,k),                       &
+     &                         ap(i,j,k), az(i,j,k), ig)
+                  ar(i,jz + 1 - j,k) = -ar(i,j,k)
+                  az(i,jz + 1 - j,k) =  az(i,j,k)
+                  ap(i,jz + 1 - j,k) =  ap(i,j,k)
+!$omp end critical(mgrid_bs_eval)
+               END DO
+            END DO
+!$omp end do
+!$omp single
+            WRITE (6,'(a,i4)') ' K = ',k
+!$omp end single
+         END IF
 !$omp end parallel
+
+      END IF
 
       IF (mgrid_mode .eq. 'R') THEN
 !  JDH 2011-080-16. Comment out below (1 line)
