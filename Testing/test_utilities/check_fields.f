@@ -362,7 +362,7 @@
       END IF
 
 1000  FORMAT('Expected ',a,' value of ',e12.5,' with in ',e12.5,               &
-     &       ' recieved ',e12.5,' at ',i3',',i3'.')
+     &       ' recieved ',e12.5,' at ',i3,',',i3,'.')
 
       END SUBROUTINE
 
@@ -412,7 +412,7 @@
       END DO
 
 1000  FORMAT('Expected ',a,' value of ',e12.5,' with in ',e12.5,               &
-     &       ' recieved ',e12.5,' at ',i3',',i3'.')
+     &       ' recieved ',e12.5,' at ',i3,',',i3,'.')
 
       END SUBROUTINE
 
