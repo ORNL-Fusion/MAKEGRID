@@ -5,6 +5,7 @@ project (makegrid C Fortran)
 find_package (OpenMP)
 
 add_executable (mgrid)
+add_dependencies (mgrid pull_makegrid)
 
 target_link_libraries (mgrid
                        
@@ -23,6 +24,7 @@ install (TARGETS mgrid)
 
 #  Build test utilities.
 add_executable (xcheck_fields)
+add_dependencies (xcheck_fields pull_makegrid)
 
 target_link_libraries (xcheck_fields PUBLIC stell)
 
